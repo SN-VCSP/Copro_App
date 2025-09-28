@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Poubelles Copro — Google Sheets</title>
+  <title>Poubelles Copro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
   <style>
     :root{
@@ -59,8 +59,10 @@
     .tabs{display:none}
     .tabs.active{display:block}
     .month-title{margin:12px 0 6px 0;font-weight:800;color:#cbd5e1}
+    .week{margin-bottom:12px;border:1px solid var(--ring);border-radius:12px;padding:10px}
+    .week-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
     .footer{padding:12px;color:#e2e8f0;font-size:12px;text-align:center}
-    textarea, select, input{width:100%;padding:8px;border-radius:10px;border:1px solid var(--ring);background:#0b1225;color:#var(--text)}
+    textarea, select, input{width:100%;padding:8px;border-radius:10px;border:1px solid var(--ring);background:#0b1225;color:var(--text)}
     .row{display:flex;gap:8px}
     .row > *{flex:1}
     .badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#1f2937;border:1px solid var(--ring);margin:4px 4px 0 0;font-size:12px}
@@ -68,7 +70,6 @@
       .kpi-grid { grid-template-columns: 1fr; }
       .row > * { flex: none; width: 100%; }
     }
-    .mini{font-size:12px;color:#cbd5e1}
   </style>
 </head>
 <body>
@@ -76,7 +77,7 @@
     <div class="brand">
       <div class="logo" aria-hidden="true"></div>
       <div>
-        <h1>🚮 Poubelles Copro — Feuille Google</h1>
+        <h1>🚮 Poubelles Copro — Gestion collaborative</h1>
         <div class="today" id="todayText">—</div>
       </div>
     </div>
@@ -85,7 +86,6 @@
       <button id="tab-actions" aria-label="Onglet Actions">Actions</button>
       <button id="tab-planning" aria-label="Onglet Planning">Planning</button>
       <button id="tab-kpis" aria-label="Onglet Performances">Performances</button>
-      <button id="tab-share" aria-label="Onglet Partage">Partage</button>
     </nav>
   </header>
 
@@ -100,7 +100,6 @@
           <div class="chips" id="heroChips"></div>
         </div>
       </div>
-
       <div class="card">
         <p class="section-title">Règles du jeu</p>
         <div class="chips">
@@ -110,12 +109,6 @@
           <span class="chip">Mercredi matin & Samedi matin: rentrée</span>
           <span class="chip">Semaine 5: libre (non attribuée)</span>
         </div>
-        <div class="mini">Stockage: Google Sheets (via Apps Script). <span id="syncState">déconnecté</span></div>
-      </div>
-
-      <div class="card" id="homeAlert" style="display:none">
-        <div class="lock">⛓️🔒</div>
-        <div><strong>Attention:</strong> 5 manquements (ou plus) détectés. Accès à la poubelle “verrouillé” pour le·s concerné·s. Mettez-vous à jour !</div>
       </div>
     </section>
 
@@ -127,7 +120,6 @@
         <div class="progress"><span id="weekProgress" style="width:0%"></span></div>
         <div class="legend" id="weekLegend">Progression de la semaine: 0/4</div>
       </div>
-
       <div class="card">
         <p class="section-title">Tâches de la semaine</p>
         <div id="currentWeekTasks"></div>
@@ -137,7 +129,10 @@
     <!-- Planning -->
     <section id="planning" class="tabs">
       <div class="card">
-        <p class="section-title">Planning 12 mois</p>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <p class="section-title">Planning 12 mois</p>
+          <button id="regeneratePlanBtn" class="big-btn">Regénérer le planning</button>
+        </div>
         <div id="planContainer"></div>
       </div>
     </section>
@@ -149,59 +144,12 @@
         <div class="kpi-grid" id="kpiGrid"></div>
         <div id="badgesBox" style="margin-top:10px"></div>
       </div>
-      <div class="card">
-        <p class="section-title">Alertes & discipline</p>
-        <div id="disciplineBox"></div>
-      </div>
-    </section>
-
-    <!-- Partage en temps réel -->
-    <section id="share" class="tabs">
-      <div class="card">
-        <p class="section-title">Connexion live (P2P)</p>
-        <p class="legend">La synchro principale passe par Google Sheets. Le P2P reste dispo pour des partages rapides.</p>
-        <div class="row">
-          <button id="btnCreateOffer">Créer une offre</button>
-          <button id="btnAcceptOffer">Accepter une offre</button>
-        </div>
-        <div style="margin-top:10px">
-          <p class="section-title">Votre offre / réponse</p>
-          <textarea id="sdpLocal" rows="6" placeholder="Offre ou réponse générée ici"></textarea>
-        </div>
-        <div style="margin-top:10px">
-          <p class="section-title">Collez l'offre/réponse reçue</p>
-          <textarea id="sdpRemote" rows="6" placeholder="Collez ici l'offre (ou la réponse) reçue"></textarea>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <button id="btnCopyLocal">Copier</button>
-          <button id="btnSetRemote">Utiliser le code reçu</button>
-        </div>
-        <div style="margin-top:10px">
-          <span class="chip" id="liveStatus">Statut: non connecté</span>
-        </div>
-      </div>
-
-      <div class="card">
-        <p class="section-title">Sauvegarde/partage alternatif</p>
-        <div class="row">
-          <button id="btnExport">Exporter JSON</button>
-          <button id="btnImport">Importer JSON</button>
-        </div>
-        <textarea id="jsonBox" rows="6" placeholder="Collez ou récupérez ici le JSON"></textarea>
-      </div>
     </section>
   </main>
 
-  <div class="footer">Données en Google Sheets (1 cellule JSON) + P2P (WebRTC). Rotation: Sofienn, Vanessa, Anthony, Marc. Semaine 5 libre.</div>
+  <div class="footer">Données en localStorage. Rotation: Sofienn, Vanessa, Anthony, Marc. Semaine 5 libre.</div>
 
 <script>
-/* ==========================
-   CONFIG — À RENSEIGNER
-   ========================== */
-// 1) Déployez le script Google Apps Script fourni (Code.gs) en "Application Web"
-// 2) Collez ici l’URL de l’application web:
-const API_BASE = "https://script.google.com/macros/s/AKfycbx9QL3i9DQP6pI2GyVwPchdSEjkEDHWYSvtJGoNpWALZ9w88bE2WYwaMNIVmSbS_9NzJg/exec"; // ex: https://script.google.com/macros/s/AKfycb.../exec
-
 /* === Données de base === */
 const PEOPLE = ["Sofienn","Vanessa","Anthony","Marc"];
 const TASKS = [
@@ -211,46 +159,22 @@ const TASKS = [
   {key:"SAT_AM", icon:"🏠", label:"Rentrer la poubelle", whenLabel:"Samedi matin", dow:6, time:"08:00"},
 ];
 
-/* === Persistance distante (Google Sheets via Apps Script) === */
-const REMOTE = {
-  async load(){
-    if(!API_BASE || API_BASE.startsWith("<<")) throw new Error("URL API non configurée");
-    const url = API_BASE + "?action=state";
-    const r = await fetch(url, {method:"GET"});
-    if(!r.ok) throw new Error("Échec GET");
-    const data = await r.json();
-    return data && data.plan ? data : null;
-  },
-  async save(db){
-    const r = await fetch(API_BASE, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ action:"state", payload: db })
-    });
-    if(!r.ok) throw new Error("Échec POST");
-    const out = await r.json();
-    return out;
-  }
+/* === Stockage local === */
+const STORE = {
+  load(){ try { return JSON.parse(localStorage.getItem("poubelle_copro_store")||"{}"); } catch(e){ return {}; } },
+  save(data){ localStorage.setItem("poubelle_copro_store", JSON.stringify(data)); }
 };
-
-/* === Fallback local (utile hors connexion) === */
-const LOCAL = {
-  load(){ try { return JSON.parse(localStorage.getItem("poubelle_copro_store_remote")||"{}"); } catch(e){ return {}; } },
-  save(data){ localStorage.setItem("poubelle_copro_store_remote", JSON.stringify(data)); }
-};
-let DB = LOCAL.load();
+let DB = STORE.load();
 if(!DB.meta){ DB.meta = {generatedAt: null, lastSweep: null}; }
 if(!DB.plan){ DB.plan = []; }
 if(!DB.done){ DB.done = {}; }
 if(!DB.missed){ DB.missed = {}; }
 if(!DB.stats){ DB.stats = {completed:{}, missed:{}, points:{}, streak:{}}; }
 if(!DB.changes){ DB.changes = {}; }
-if(!DB.share){ DB.share = {version:1}; }
 
 /* === Date helpers === */
 function pad(n){ return n<10 ? "0"+n : ""+n; }
 function fmtDate(d){ return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`; }
-function fmtDateTime(d){ return `${fmtDate(d)} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
 function startOfDay(d){ const x=new Date(d); x.setHours(0,0,0,0); return x; }
 function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
 function setTime(d,hhmm){ const x=new Date(d); const [hh,mm]=hhmm.split(":").map(Number); x.setHours(hh||0,mm||0,0,0); return x; }
@@ -290,7 +214,8 @@ function generateYearPlan(){
   }
   DB.plan = plan;
   DB.meta.generatedAt = new Date().toISOString();
-  LOCAL.save(DB);
+  STORE.save(DB);
+  renderPlanning();
 }
 
 /* === Gamification === */
@@ -298,24 +223,15 @@ function addPoints(person, pts){
   if(!person) return;
   DB.stats.points[person] = (DB.stats.points[person]||0) + pts;
   DB.stats.streak[person] = (DB.stats.streak[person]||0) + 1;
+  STORE.save(DB);
 }
 function breakStreak(person){
   if(!person) return;
   DB.stats.streak[person] = 0;
-}
-function computeBadges(person){
-  const pts = DB.stats.points[person]||0;
-  const st = DB.stats.streak[person]||0;
-  const badges = [];
-  if(pts >= 10) badges.push("🏅 Bronze");
-  if(pts >= 25) badges.push("🥈 Argent");
-  if(pts >= 50) badges.push("🥇 Or");
-  if(st >= 4) badges.push("🔥 Série 4+");
-  if((DB.stats.missed[person]||0) === 0 && pts>=8) badges.push("🛡️ Parfait");
-  return badges;
+  STORE.save(DB);
 }
 
-/* === Tâches courantes === */
+/* === Trouver la tâche actuelle et la semaine === */
 function findCurrentTask(){
   const now = new Date();
   let nearest = null;
@@ -345,18 +261,16 @@ function currentWeekBlock(){
   return found;
 }
 
-/* === Marquage & manquements === */
-async function markDone(taskId, person){
+/* === Marquage et manquements === */
+function markDone(taskId, person){
   if(DB.done[taskId] || DB.missed[taskId]) return;
   DB.done[taskId] = true;
   if(person){
     DB.stats.completed[person] = (DB.stats.completed[person]||0) + 1;
     addPoints(person, 2);
   }
-  LOCAL.save(DB);
-  broadcastDB();
+  STORE.save(DB);
   renderAll();
-  await remoteSaveSafely();
 }
 
 function sweepMissed(){
@@ -377,32 +291,17 @@ function sweepMissed(){
     });
   });
   DB.meta.lastSweep = now.toISOString();
-  LOCAL.save(DB);
+  STORE.save(DB);
 }
 
-async function requestChange(task, toPerson){
-  if(!toPerson) return;
+/* === Demande de changement === */
+function requestChange(task, toPerson){
+  if(!toPerson || !PEOPLE.includes(toPerson)) return;
   const prev = task.person;
   DB.changes[task.id] = {from: prev || "Libre", to: toPerson};
   task.person = toPerson;
-  LOCAL.save(DB);
-  broadcastDB();
+  STORE.save(DB);
   renderAll();
-  await remoteSaveSafely();
-}
-
-/* === Sync helpers === */
-function setSyncState(txt){
-  document.getElementById("syncState").textContent = "• " + txt;
-}
-async function remoteSaveSafely(){
-  try{
-    setSyncState("sauvegarde…");
-    await REMOTE.save(DB);
-    setSyncState("à jour");
-  }catch(e){
-    setSyncState("hors-ligne (sauvegarde locale)");
-  }
 }
 
 /* === UI === */
@@ -435,10 +334,6 @@ function renderHome(){
     whoEl.textContent = "Responsable actuel: —";
     taskEl.textContent = "Aucune tâche à proximité.";
   }
-
-  const offenders = PEOPLE.filter(p=> (DB.stats.missed[p]||0) >= 5 );
-  const alertBox = document.getElementById("homeAlert");
-  alertBox.style.display = offenders.length>0 ? "block" : "none";
 }
 
 function renderActions(){
@@ -464,7 +359,7 @@ function renderActions(){
       bChange.className = "change";
       bChange.addEventListener("click", ()=>{
         const to = prompt("Qui prend la tâche ? " + PEOPLE.join(", "));
-        if(to){ requestChange(t, to); }
+        if(to && PEOPLE.includes(to)){ requestChange(t, to); }
       });
       right.appendChild(bDone);
       right.appendChild(bChange);
@@ -496,6 +391,11 @@ function renderActions(){
 function renderPlanning(){
   const container = document.getElementById("planContainer");
   container.innerHTML = "";
+  if(!DB.plan || DB.plan.length === 0){
+    container.innerHTML = "<p>Aucun planning. <button onclick='generateYearPlan()'>Générer maintenant</button></p>";
+    return;
+  }
+
   DB.plan.forEach(month=>{
     const monthName = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"][month.monthIdx];
     const title = document.createElement("div");
@@ -528,7 +428,7 @@ function renderPlanning(){
         bAssign.className = "assign";
         bAssign.addEventListener("click", ()=>{
           const to = prompt("Qui prend la tâche ? " + PEOPLE.join(", "));
-          if(to){ requestChange(t, to); }
+          if(to && PEOPLE.includes(to)){ requestChange(t, to); }
         });
         right.appendChild(b); right.appendChild(bAssign);
         row.appendChild(left); row.appendChild(right);
@@ -543,12 +443,10 @@ function renderPlanning(){
 function renderKPIs(){
   const grid = document.getElementById("kpiGrid");
   grid.innerHTML = "";
-  const leaderboard = [];
   PEOPLE.forEach(name=>{
     const done = (DB.stats.completed[name]||0);
     const miss = (DB.stats.missed[name]||0);
     const pts = (DB.stats.points[name]||0);
-    leaderboard.push({name, pts});
     const kpi = document.createElement("div");
     kpi.className="kpi";
     kpi.innerHTML = `<h3>${name}</h3>
@@ -558,28 +456,6 @@ function renderKPIs(){
       <div style="margin-top:6px"><strong>Série:</strong> ${DB.stats.streak[name]||0}</div>`;
     grid.appendChild(kpi);
   });
-  leaderboard.sort((a,b)=> b.pts - a.pts);
-  const badgesBox = document.getElementById("badgesBox");
-  badgesBox.innerHTML = "<p class='section-title'>Badges</p>";
-  PEOPLE.forEach(name=>{
-    const badges = computeBadges(name);
-    const wrap = document.createElement("div");
-    wrap.innerHTML = `<div class="badge">${name}</div> ${badges.map(b=>`<span class="badge">${b}</span>`).join(" ") || "<span class='badge'>—</span>"}`;
-    badgesBox.appendChild(wrap);
-  });
-
-  const discipline = document.getElementById("disciplineBox");
-  const offenders = PEOPLE.filter(p=>(DB.stats.missed[p]||0)>=5);
-  if(offenders.length){
-    discipline.innerHTML = `
-      <div class="alert">
-        <div class="lock">⛓️🔒</div>
-        <strong>Alerte:</strong> ${offenders.join(", ")} — 5 manquements ou plus.
-        Validez vos tâches pour “déverrouiller” l’accès.
-      </div>`;
-  } else {
-    discipline.innerHTML = `<div class="chip">Aucune alerte. Continuez ainsi 💪</div>`;
-  }
 }
 
 function renderAll(){
@@ -589,142 +465,21 @@ function renderAll(){
   renderKPIs();
 }
 
-async function bootstrap(){
+function init(){
   if(!DB.meta.generatedAt){ generateYearPlan(); }
   sweepMissed();
-  try{
-    setSyncState("chargement…");
-    const remote = await REMOTE.load();
-    if(remote){
-      DB = remote;
-      LOCAL.save(DB);
-      setSyncState("à jour");
-    }else{
-      // Première initialisation distante
-      await remoteSaveSafely();
-    }
-  }catch(e){
-    setSyncState("hors-ligne (local)");
-  }
   document.getElementById("tab-home").onclick = ()=> setActiveTab("home");
   document.getElementById("tab-actions").onclick = ()=> setActiveTab("actions");
   document.getElementById("tab-planning").onclick = ()=> setActiveTab("planning");
   document.getElementById("tab-kpis").onclick = ()=> setActiveTab("kpis");
-  document.getElementById("tab-share").onclick = ()=> setActiveTab("share");
+  document.getElementById("regeneratePlanBtn").onclick = ()=> {
+    if(confirm("Cela écrasera le planning actuel. Continuer ?")){ generateYearPlan(); }
+  };
   renderAll();
 }
-bootstrap();
+
+init();
 setInterval(()=>{ renderHome(); }, 60*1000);
-
-/* === Export / Import JSON === */
-document.getElementById("btnExport").onclick = ()=>{
-  document.getElementById("jsonBox").value = JSON.stringify(DB, null, 2);
-};
-document.getElementById("btnImport").onclick = async ()=>{
-  try{
-    const obj = JSON.parse(document.getElementById("jsonBox").value || "{}");
-    if(obj && obj.plan){
-      DB = obj;
-      LOCAL.save(DB);
-      renderAll();
-      broadcastDB();
-      await remoteSaveSafely();
-      alert("Import réussi !");
-    } else {
-      alert("JSON invalide (plan manquant).");
-    }
-  }catch(e){ alert("JSON invalide."); }
-};
-
-/* === WebRTC DataChannel (optionnel) === */
-let pc = null, dc = null, isCreator = false;
-
-function resetRTC(){
-  pc = new RTCPeerConnection({iceServers:[{urls:["stun:stun.l.google.com:19302","stun:global.stun.twilio.com:3478"]}]});
-  dc = pc.createDataChannel("poubelles");
-  dc.onopen = ()=> { setLiveStatus("connecté"); sendFullState(); };
-  dc.onclose = ()=> setLiveStatus("non connecté");
-  dc.onmessage = (ev)=> {
-    try{
-      const msg = JSON.parse(ev.data);
-      if(msg.type === "STATE"){
-        DB = msg.payload;
-        LOCAL.save(DB);
-        renderAll();
-        remoteSaveSafely();
-      }
-    }catch(e){}
-  };
-  pc.onicecandidate = (ev)=>{
-    if(ev.candidate) return;
-    document.getElementById("sdpLocal").value = JSON.stringify(pc.localDescription);
-  };
-  pc.ondatachannel = (ev)=> {
-    dc = ev.channel;
-    dc.onopen = ()=> { setLiveStatus("connecté"); sendFullState(); };
-    dc.onmessage = (ev)=> {
-      try{
-        const msg = JSON.parse(ev.data);
-        if(msg.type === "STATE"){
-          DB = msg.payload;
-          LOCAL.save(DB);
-          renderAll();
-          remoteSaveSafely();
-        }
-      }catch(e){}
-    };
-  };
-  pc.oniceconnectionstatechange = () => {
-    if (pc.iceConnectionState === "failed") {
-      setLiveStatus("échec de connexion");
-      resetRTC();
-    }
-  };
-}
-
-function setLiveStatus(txt){
-  const el = document.getElementById("liveStatus");
-  el.textContent = "Statut: " + txt;
-}
-
-function sendFullState(){
-  if(dc && dc.readyState === "open"){
-    dc.send(JSON.stringify({type:"STATE", payload:DB}));
-  }
-}
-function broadcastDB(){ sendFullState(); }
-
-document.getElementById("btnCreateOffer").onclick = async ()=>{
-  isCreator = true;
-  resetRTC();
-  const offer = await pc.createOffer({offerToReceiveAudio:false,offerToReceiveVideo:false});
-  await pc.setLocalDescription(offer);
-  setLiveStatus("offre créée — copiez et envoyez");
-};
-document.getElementById("btnAcceptOffer").onclick = ()=>{
-  isCreator = false;
-  resetRTC();
-  setLiveStatus("prêt à accepter une offre");
-};
-document.getElementById("btnCopyLocal").onclick = ()=>{
-  const txt = document.getElementById("sdpLocal").value;
-  navigator.clipboard.writeText(txt).then(()=> alert("Copié !"));
-};
-document.getElementById("btnSetRemote").onclick = async ()=>{
-  try{
-    const remote = JSON.parse(document.getElementById("sdpRemote").value);
-    await pc.setRemoteDescription(remote);
-    if(remote.type === "offer"){
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      setLiveStatus("réponse créée — copiez et renvoyez");
-    } else {
-      setLiveStatus("tentative de connexion…");
-    }
-  }catch(e){
-    alert("Code invalide (SDP).");
-  }
-};
 </script>
 </body>
 </html>
