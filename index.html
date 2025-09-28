@@ -358,6 +358,9 @@ function renderWeeks(){
   const today=new Date();
 
   current.weeks.forEach((w,i)=>{
+    const weekEnd = addDays(w.weekStart,7);
+    if(weekEnd < today) return; // ⬅️ ignore les semaines déjà passées
+
     const wrap=document.createElement("div");wrap.className="week"+(w.isLibre?" libre":"");
     const range=weekRange(w.weekStart);
     const tagColor=colorFor(w.responsible);
