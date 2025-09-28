@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Poubelles Copro — Google Sheets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+  <style>
+    :root{
+      --bg1:#1e1b4b; --bg2:#0ea5e9;
+      --card:#111827; --text:#f8fafc; --muted:#cbd5e1;
+      --chip:#1f2937; --ring:#334155;
+      --accent:#22c55e; --accent2:#f59e0b; --accent3:#06b6d4;
+      --danger:#ef4444; --warn:#f59e0b;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;background:linear-gradient(135deg,var(--bg1),#3b82f6,var(--bg2));color:var(--text)}
+    header{
+      position:sticky;top:0;z-index:50;
+      background:linear-gradient(90deg,#7c3aed,#06b6d4);
+      padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.2);
+      display:flex;gap:12px;align-items:center;justify-content:space-between
+    }
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:38px;height:38px;border-radius:12px;background:conic-gradient(#22c55e,#f59e0b,#06b6d4,#ef4444,#22c55e);box-shadow:0 6px 24px rgba(0,0,0,.3)}
+    .brand h1{margin:0;font-size:18px}
+    .today{font-size:12px;color:#e2e8f0}
+    nav{display:flex;gap:8px}
+    nav button{flex:1;padding:10px 12px;border:1px solid rgba(255,255,255,.2);border-radius:12px;background:rgba(0,0,0,.25);color:var(--text);font-weight:700}
+    nav button.active{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.2) inset}
+    main{padding:16px}
+    .card{background:rgba(17,24,39,.75);backdrop-filter:blur(6px);border:1px solid var(--ring);border-radius:16px;padding:14px;margin-bottom:16px}
+    .hero{display:flex;gap:12px;align-items:center}
+    .hero-avatar{width:62px;height:62px;border-radius:50%;background:radial-gradient(circle,#22c55e,#06b6d4,#f59e0b);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .hero h2{margin:0 0 4px 0;font-size:18px}
+    .hero .sub{color:var(--muted);font-size:12px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .chip{background:var(--chip);border:1px solid var(--ring);border-radius:999px;padding:6px 10px;font-size:12px}
+    .section-title{font-weight:800;margin:0 0 8px 0;font-size:14px;color:#e2e8f0}
+    .big-action{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+    .big-btn{width:100%;padding:14px;border-radius:16px;border:1px solid var(--ring);
+      background:linear-gradient(180deg,#1f2937 0%, #0f172a 100%);color:var(--text);font-weight:800;font-size:16px}
+    .big-btn.done{background:linear-gradient(180deg,#22c55e 0%, #16a34a 100%);border-color:#16a34a;color:#04210f}
+    .progress{width:100%;height:10px;border-radius:999px;background:#0b1225;border:1px solid var(--ring);overflow:hidden}
+    .progress > span{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#06b6d4)}
+    .task-row{display:flex;align-items:center;justify-content:space-between;background:#0b1225;border:1px solid var(--ring);border-radius:12px;padding:10px;margin:6px 0}
+    .task-row .name{font-weight:800}
+    .task-row .when{color:var(--muted);font-size:12px}
+    .task-row button{padding:8px 10px;border-radius:10px;border:1px solid var(--ring);background:#1f2937;color:var(--text);font-weight:700}
+    .task-row button.done{background:#16a34a;border-color:#16a34a;color:#052e13}
+    .task-row button.change{background:#f59e0b;border-color:#c2410c}
+    .task-row button.assign{background:#06b6d4;border-color:#0e7490}
+    .alert{margin-top:8px;padding:10px;border-radius:12px;border:1px solid var(--danger);color:#fecaca;background:#2b0b0b}
+    .lock{font-size:40px;line-height:1}
+    .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .kpi{background:#0b1225;border:1px solid var(--ring);border-radius:12px;padding:10px}
+    .kpi h3{margin:0 0 6px 0;font-size:14px}
+    .kpi .val{font-size:22px;font-weight:800}
+    .legend{font-size:12px;color:var(--muted)}
+    .tabs{display:none}
+    .tabs.active{display:block}
+    .month-title{margin:12px 0 6px 0;font-weight:800;color:#cbd5e1}
+    .footer{padding:12px;color:#e2e8f0;font-size:12px;text-align:center}
+    textarea, select, input{width:100%;padding:8px;border-radius:10px;border:1px solid var(--ring);background:#0b1225;color:#var(--text)}
+    .row{display:flex;gap:8px}
+    .row > *{flex:1}
+    .badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#1f2937;border:1px solid var(--ring);margin:4px 4px 0 0;font-size:12px}
+    @media (max-width: 600px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .row > * { flex: none; width: 100%; }
+    }
+    .mini{font-size:12px;color:#cbd5e1}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>🚮 Poubelles Copro — Feuille Google</h1>
+        <div class="today" id="todayText">—</div>
+      </div>
+    </div>
+    <nav>
+      <button id="tab-home" class="active" aria-label="Onglet Accueil">Accueil</button>
+      <button id="tab-actions" aria-label="Onglet Actions">Actions</button>
+      <button id="tab-planning" aria-label="Onglet Planning">Planning</button>
+      <button id="tab-kpis" aria-label="Onglet Performances">Performances</button>
+      <button id="tab-share" aria-label="Onglet Partage">Partage</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Accueil -->
+    <section id="home" class="tabs active">
+      <div class="card hero">
+        <div class="hero-avatar" aria-hidden="true"></div>
+        <div>
+          <h2 id="heroWho">Responsable actuel: —</h2>
+          <div class="sub" id="heroTask">Prochaine tâche: —</div>
+          <div class="chips" id="heroChips"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Règles du jeu</p>
+        <div class="chips">
+          <span class="chip">Tour de rôle: 2 fois/semaine</span>
+          <span class="chip">Semaine 1 du mois: Sofienn</span>
+          <span class="chip">Mardi soir & Vendredi soir: sortie</span>
+          <span class="chip">Mercredi matin & Samedi matin: rentrée</span>
+          <span class="chip">Semaine 5: libre (non attribuée)</span>
+        </div>
+        <div class="mini">Stockage: Google Sheets (via Apps Script). <span id="syncState">déconnecté</span></div>
+      </div>
+
+      <div class="card" id="homeAlert" style="display:none">
+        <div class="lock">⛓️🔒</div>
+        <div><strong>Attention:</strong> 5 manquements (ou plus) détectés. Accès à la poubelle “verrouillé” pour le·s concerné·s. Mettez-vous à jour !</div>
+      </div>
+    </section>
+
+    <!-- Actions -->
+    <section id="actions" class="tabs">
+      <div class="card big-action">
+        <p class="section-title">Bouton central</p>
+        <button id="bigActionBtn" class="big-btn">Marquer la tâche du moment comme accomplie</button>
+        <div class="progress"><span id="weekProgress" style="width:0%"></span></div>
+        <div class="legend" id="weekLegend">Progression de la semaine: 0/4</div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Tâches de la semaine</p>
+        <div id="currentWeekTasks"></div>
+      </div>
+    </section>
+
+    <!-- Planning -->
+    <section id="planning" class="tabs">
+      <div class="card">
+        <p class="section-title">Planning 12 mois</p>
+        <div id="planContainer"></div>
+      </div>
+    </section>
+
+    <!-- Performances -->
+    <section id="kpis" class="tabs">
+      <div class="card">
+        <p class="section-title">Indicateurs & classement</p>
+        <div class="kpi-grid" id="kpiGrid"></div>
+        <div id="badgesBox" style="margin-top:10px"></div>
+      </div>
+      <div class="card">
+        <p class="section-title">Alertes & discipline</p>
+        <div id="disciplineBox"></div>
+      </div>
+    </section>
+
+    <!-- Partage en temps réel -->
+    <section id="share" class="tabs">
+      <div class="card">
+        <p class="section-title">Connexion live (P2P)</p>
+        <p class="legend">La synchro principale passe par Google Sheets. Le P2P reste dispo pour des partages rapides.</p>
+        <div class="row">
+          <button id="btnCreateOffer">Créer une offre</button>
+          <button id="btnAcceptOffer">Accepter une offre</button>
+        </div>
+        <div style="margin-top:10px">
+          <p class="section-title">Votre offre / réponse</p>
+          <textarea id="sdpLocal" rows="6" placeholder="Offre ou réponse générée ici"></textarea>
+        </div>
+        <div style="margin-top:10px">
+          <p class="section-title">Collez l'offre/réponse reçue</p>
+          <textarea id="sdpRemote" rows="6" placeholder="Collez ici l'offre (ou la réponse) reçue"></textarea>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button id="btnCopyLocal">Copier</button>
+          <button id="btnSetRemote">Utiliser le code reçu</button>
+        </div>
+        <div style="margin-top:10px">
+          <span class="chip" id="liveStatus">Statut: non connecté</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Sauvegarde/partage alternatif</p>
+        <div class="row">
+          <button id="btnExport">Exporter JSON</button>
+          <button id="btnImport">Importer JSON</button>
+        </div>
+        <textarea id="jsonBox" rows="6" placeholder="Collez ou récupérez ici le JSON"></textarea>
+      </div>
+    </section>
+  </main>
+
+  <div class="footer">Données en Google Sheets (1 cellule JSON) + P2P (WebRTC). Rotation: Sofienn, Vanessa, Anthony, Marc. Semaine 5 libre.</div>
+
+<script>
+/* ==========================
+   CONFIG — À RENSEIGNER
+   ========================== */
+// 1) Déployez le script Google Apps Script fourni (Code.gs) en "Application Web"
+// 2) Collez ici l’URL de l’application web:
+const API_BASE = "https://script.google.com/macros/s/AKfycbx9QL3i9DQP6pI2GyVwPchdSEjkEDHWYSvtJGoNpWALZ9w88bE2WYwaMNIVmSbS_9NzJg/exec"; // ex: https://script.google.com/macros/s/AKfycb.../exec
+
+/* === Données de base === */
+const PEOPLE = ["Sofienn","Vanessa","Anthony","Marc"];
+const TASKS = [
+  {key:"TUE_PM", icon:"🗑️", label:"Sortir la poubelle", whenLabel:"Mardi soir", dow:2, time:"18:00"},
+  {key:"WED_AM", icon:"🏠", label:"Rentrer la poubelle", whenLabel:"Mercredi matin", dow:3, time:"08:00"},
+  {key:"FRI_PM", icon:"🗑️", label:"Sortir la poubelle", whenLabel:"Vendredi soir", dow:5, time:"18:00"},
+  {key:"SAT_AM", icon:"🏠", label:"Rentrer la poubelle", whenLabel:"Samedi matin", dow:6, time:"08:00"},
+];
+
+/* === Persistance distante (Google Sheets via Apps Script) === */
+const REMOTE = {
+  async load(){
+    if(!API_BASE || API_BASE.startsWith("<<")) throw new Error("URL API non configurée");
+    const url = API_BASE + "?action=state";
+    const r = await fetch(url, {method:"GET"});
+    if(!r.ok) throw new Error("Échec GET");
+    const data = await r.json();
+    return data && data.plan ? data : null;
+  },
+  async save(db){
+    const r = await fetch(API_BASE, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ action:"state", payload: db })
+    });
+    if(!r.ok) throw new Error("Échec POST");
+    const out = await r.json();
+    return out;
+  }
+};
+
+/* === Fallback local (utile hors connexion) === */
+const LOCAL = {
+  load(){ try { return JSON.parse(localStorage.getItem("poubelle_copro_store_remote")||"{}"); } catch(e){ return {}; } },
+  save(data){ localStorage.setItem("poubelle_copro_store_remote", JSON.stringify(data)); }
+};
+let DB = LOCAL.load();
+if(!DB.meta){ DB.meta = {generatedAt: null, lastSweep: null}; }
+if(!DB.plan){ DB.plan = []; }
+if(!DB.done){ DB.done = {}; }
+if(!DB.missed){ DB.missed = {}; }
+if(!DB.stats){ DB.stats = {completed:{}, missed:{}, points:{}, streak:{}}; }
+if(!DB.changes){ DB.changes = {}; }
+if(!DB.share){ DB.share = {version:1}; }
+
+/* === Date helpers === */
+function pad(n){ return n<10 ? "0"+n : ""+n; }
+function fmtDate(d){ return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`; }
+function fmtDateTime(d){ return `${fmtDate(d)} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function startOfDay(d){ const x=new Date(d); x.setHours(0,0,0,0); return x; }
+function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function setTime(d,hhmm){ const x=new Date(d); const [hh,mm]=hhmm.split(":").map(Number); x.setHours(hh||0,mm||0,0,0); return x; }
+function firstMondayOfMonth(year, monthIndex){
+  const d = new Date(year, monthIndex, 1);
+  const day = d.getDay();
+  const offset = (day === 0) ? 1 : (day === 1 ? 0 : (8 - day) % 7);
+  d.setDate(d.getDate() + offset);
+  return startOfDay(d);
+}
+
+/* === Génération du planning 12 mois === */
+function generateYearPlan(){
+  const now = new Date();
+  const startYear = now.getFullYear();
+  const startMonth = now.getMonth();
+  const plan = [];
+  for(let m=0;m<12;m++){
+    const year = startMonth+m >= 12 ? startYear+1 : startYear;
+    const monthIdx = (startMonth+m) % 12;
+    const monthStartMonday = firstMondayOfMonth(year, monthIdx);
+    const weeks = [];
+    for(let w=0; w<5; w++){
+      const weekStart = addDays(monthStartMonday, 7*w);
+      if(weekStart.getMonth() !== monthIdx && w>0) break;
+      const assigned = (w === 4) ? null : (w === 0 ? PEOPLE[0] : PEOPLE[(w % PEOPLE.length)]);
+      const tasks = TASKS.map(t=>{
+        const delta = (t.dow + 7 - 1) % 7;
+        const d = addDays(weekStart, delta);
+        const dt = setTime(d, t.time);
+        const id = `Y${year}M${monthIdx+1}W${w+1}_${t.key}`;
+        return { id, person: assigned, label: t.label, icon: t.icon, whenLabel: t.whenLabel, date: dt.toISOString(), y: year, m: monthIdx+1, w: w+1, key: t.key };
+      });
+      weeks.push({year, monthIdx, w: w+1, assigned, weekStart, tasks});
+    }
+    plan.push({year, monthIdx, weeks});
+  }
+  DB.plan = plan;
+  DB.meta.generatedAt = new Date().toISOString();
+  LOCAL.save(DB);
+}
+
+/* === Gamification === */
+function addPoints(person, pts){
+  if(!person) return;
+  DB.stats.points[person] = (DB.stats.points[person]||0) + pts;
+  DB.stats.streak[person] = (DB.stats.streak[person]||0) + 1;
+}
+function breakStreak(person){
+  if(!person) return;
+  DB.stats.streak[person] = 0;
+}
+function computeBadges(person){
+  const pts = DB.stats.points[person]||0;
+  const st = DB.stats.streak[person]||0;
+  const badges = [];
+  if(pts >= 10) badges.push("🏅 Bronze");
+  if(pts >= 25) badges.push("🥈 Argent");
+  if(pts >= 50) badges.push("🥇 Or");
+  if(st >= 4) badges.push("🔥 Série 4+");
+  if((DB.stats.missed[person]||0) === 0 && pts>=8) badges.push("🛡️ Parfait");
+  return badges;
+}
+
+/* === Tâches courantes === */
+function findCurrentTask(){
+  const now = new Date();
+  let nearest = null;
+  DB.plan.forEach(month=>{
+    month.weeks.forEach(w=>{
+      w.tasks.forEach(t=>{
+        const dt = new Date(t.date);
+        const diff = dt - now;
+        if(diff >= -6*60*60*1000){
+          if(!nearest || diff < (new Date(nearest.date)-now)) nearest = t;
+        }
+      });
+    });
+  });
+  return nearest;
+}
+function currentWeekBlock(){
+  const now = new Date();
+  let found = null;
+  DB.plan.forEach(month=>{
+    month.weeks.forEach(week=>{
+      const start = startOfDay(week.weekStart);
+      const end = addDays(start,7);
+      if(now >= start && now < end){ found = week; }
+    });
+  });
+  return found;
+}
+
+/* === Marquage & manquements === */
+async function markDone(taskId, person){
+  if(DB.done[taskId] || DB.missed[taskId]) return;
+  DB.done[taskId] = true;
+  if(person){
+    DB.stats.completed[person] = (DB.stats.completed[person]||0) + 1;
+    addPoints(person, 2);
+  }
+  LOCAL.save(DB);
+  broadcastDB();
+  renderAll();
+  await remoteSaveSafely();
+}
+
+function sweepMissed(){
+  const now = new Date();
+  const last = DB.meta.lastSweep ? new Date(DB.meta.lastSweep) : new Date(0);
+  DB.plan.forEach(month=>{
+    month.weeks.forEach(week=>{
+      week.tasks.forEach(t=>{
+        const dt = new Date(t.date);
+        if(dt < now && dt > last && !DB.done[t.id] && !DB.missed[t.id]){
+          DB.missed[t.id] = true;
+          if(t.person){
+            DB.stats.missed[t.person] = (DB.stats.missed[t.person]||0) + 1;
+            breakStreak(t.person);
+          }
+        }
+      });
+    });
+  });
+  DB.meta.lastSweep = now.toISOString();
+  LOCAL.save(DB);
+}
+
+async function requestChange(task, toPerson){
+  if(!toPerson) return;
+  const prev = task.person;
+  DB.changes[task.id] = {from: prev || "Libre", to: toPerson};
+  task.person = toPerson;
+  LOCAL.save(DB);
+  broadcastDB();
+  renderAll();
+  await remoteSaveSafely();
+}
+
+/* === Sync helpers === */
+function setSyncState(txt){
+  document.getElementById("syncState").textContent = "• " + txt;
+}
+async function remoteSaveSafely(){
+  try{
+    setSyncState("sauvegarde…");
+    await REMOTE.save(DB);
+    setSyncState("à jour");
+  }catch(e){
+    setSyncState("hors-ligne (sauvegarde locale)");
+  }
+}
+
+/* === UI === */
+function setActiveTab(tab){
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tabs").forEach(s=>s.classList.remove("active"));
+  document.getElementById(`tab-${tab}`).classList.add("active");
+  document.getElementById(tab).classList.add("active");
+}
+
+function renderHome(){
+  const todayTxt = document.getElementById("todayText");
+  const now = new Date();
+  const days = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+  todayTxt.textContent = `${days[now.getDay()]} ${fmtDate(now)} • ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+  const t = findCurrentTask();
+  const whoEl = document.getElementById("heroWho");
+  const taskEl = document.getElementById("heroTask");
+  const chipsEl = document.getElementById("heroChips");
+  chipsEl.innerHTML = "";
+  if(t){
+    const who = t.person || "Libre (tous)";
+    whoEl.textContent = `Responsable actuel: ${who}`;
+    taskEl.textContent = `Prochaine tâche: ${t.icon} ${t.label} — ${t.whenLabel} (${fmtDate(new Date(t.date))})`;
+    const weekChip = document.createElement("span"); weekChip.className="chip"; weekChip.textContent = `Semaine ${t.w}`;
+    const statusChip = document.createElement("span"); statusChip.className="chip"; statusChip.textContent = DB.done[t.id] ? "État: accompli" : "État: à faire";
+    chipsEl.appendChild(weekChip); chipsEl.appendChild(statusChip);
+  } else {
+    whoEl.textContent = "Responsable actuel: —";
+    taskEl.textContent = "Aucune tâche à proximité.";
+  }
+
+  const offenders = PEOPLE.filter(p=> (DB.stats.missed[p]||0) >= 5 );
+  const alertBox = document.getElementById("homeAlert");
+  alertBox.style.display = offenders.length>0 ? "block" : "none";
+}
+
+function renderActions(){
+  const btn = document.getElementById("bigActionBtn");
+  const currentWeek = currentWeekBlock();
+  const tasksBox = document.getElementById("currentWeekTasks");
+  tasksBox.innerHTML = "";
+  let doneCount = 0;
+
+  if(currentWeek){
+    currentWeek.tasks.forEach(t=>{
+      const row = document.createElement("div");
+      row.className = "task-row";
+      const left = document.createElement("div");
+      left.innerHTML = `<div class="name">${t.icon} ${t.label}</div><div class="when">${t.whenLabel} • ${fmtDate(new Date(t.date))} • ${t.person ? t.person : "Libre"}</div>`;
+      const right = document.createElement("div");
+      const bDone = document.createElement("button");
+      bDone.textContent = DB.done[t.id] ? "Accomplie" : "Valider";
+      bDone.className = DB.done[t.id] ? "done" : "";
+      bDone.addEventListener("click", ()=> markDone(t.id, t.person));
+      const bChange = document.createElement("button");
+      bChange.textContent = "Changer";
+      bChange.className = "change";
+      bChange.addEventListener("click", ()=>{
+        const to = prompt("Qui prend la tâche ? " + PEOPLE.join(", "));
+        if(to){ requestChange(t, to); }
+      });
+      right.appendChild(bDone);
+      right.appendChild(bChange);
+      row.appendChild(left); row.appendChild(right);
+      tasksBox.appendChild(row);
+      if(DB.done[t.id]) doneCount++;
+    });
+  }
+
+  const nearest = currentWeek ? currentWeek.tasks.find(x=>!DB.done[x.id]) || currentWeek.tasks[0] : null;
+  if(nearest){
+    btn.textContent = DB.done[nearest.id] ? "Déjà accompli" : `Valider: ${nearest.icon} ${nearest.label} (${nearest.whenLabel})`;
+    btn.className = DB.done[nearest.id] ? "big-btn done" : "big-btn";
+    btn.onclick = ()=> markDone(nearest.id, nearest.person);
+  } else {
+    btn.textContent = "Rien à valider";
+    btn.className = "big-btn";
+    btn.onclick = null;
+  }
+
+  const prog = document.getElementById("weekProgress");
+  const legend = document.getElementById("weekLegend");
+  const total = currentWeek ? currentWeek.tasks.length : 4;
+  const pct = Math.round((doneCount/total)*100);
+  prog.style.width = pct+"%";
+  legend.textContent = `Progression de la semaine: ${doneCount}/${total}`;
+}
+
+function renderPlanning(){
+  const container = document.getElementById("planContainer");
+  container.innerHTML = "";
+  DB.plan.forEach(month=>{
+    const monthName = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"][month.monthIdx];
+    const title = document.createElement("div");
+    title.className="month-title";
+    title.textContent = `${monthName} ${month.year}`;
+    container.appendChild(title);
+
+    month.weeks.forEach(week=>{
+      const wrap = document.createElement("div");
+      wrap.className="week";
+      const head = document.createElement("div");
+      head.className="week-head";
+      const who = week.assigned ? week.assigned : "Libre (tous)";
+      head.innerHTML = `<div><strong>Semaine ${week.w}</strong> • du ${fmtDate(week.weekStart)} au ${fmtDate(addDays(week.weekStart,6))}</div><div class="chip">${who}</div>`;
+      wrap.appendChild(head);
+
+      week.tasks.forEach(t=>{
+        const row = document.createElement("div");
+        row.className="task-row";
+        const left = document.createElement("div");
+        const changeInfo = DB.changes[t.id] ? ` • échangée: ${DB.changes[t.id].from} ➜ ${DB.changes[t.id].to}` : "";
+        left.innerHTML = `<div class="name">${t.icon} ${t.label}</div><div class="when">${t.whenLabel} • ${fmtDate(new Date(t.date))} • ${t.person ? t.person : "Libre"}${changeInfo}</div>`;
+        const right = document.createElement("div");
+        const b = document.createElement("button");
+        b.textContent = DB.done[t.id] ? "Accomplie" : "Marquer";
+        b.className = DB.done[t.id] ? "done" : "";
+        b.addEventListener("click", ()=> markDone(t.id, t.person));
+        const bAssign = document.createElement("button");
+        bAssign.textContent = "Changer";
+        bAssign.className = "assign";
+        bAssign.addEventListener("click", ()=>{
+          const to = prompt("Qui prend la tâche ? " + PEOPLE.join(", "));
+          if(to){ requestChange(t, to); }
+        });
+        right.appendChild(b); right.appendChild(bAssign);
+        row.appendChild(left); row.appendChild(right);
+        wrap.appendChild(row);
+      });
+
+      container.appendChild(wrap);
+    });
+  });
+}
+
+function renderKPIs(){
+  const grid = document.getElementById("kpiGrid");
+  grid.innerHTML = "";
+  const leaderboard = [];
+  PEOPLE.forEach(name=>{
+    const done = (DB.stats.completed[name]||0);
+    const miss = (DB.stats.missed[name]||0);
+    const pts = (DB.stats.points[name]||0);
+    leaderboard.push({name, pts});
+    const kpi = document.createElement("div");
+    kpi.className="kpi";
+    kpi.innerHTML = `<h3>${name}</h3>
+      <div class="val">${done} ✓</div><div class="legend">Tâches accomplies</div>
+      <div style="margin-top:6px;color:${miss>=5?'#fecaca': 'var(--muted)'}">${miss} ✗ manquées</div>
+      <div style="margin-top:6px"><strong>Points:</strong> ${pts}</div>
+      <div style="margin-top:6px"><strong>Série:</strong> ${DB.stats.streak[name]||0}</div>`;
+    grid.appendChild(kpi);
+  });
+  leaderboard.sort((a,b)=> b.pts - a.pts);
+  const badgesBox = document.getElementById("badgesBox");
+  badgesBox.innerHTML = "<p class='section-title'>Badges</p>";
+  PEOPLE.forEach(name=>{
+    const badges = computeBadges(name);
+    const wrap = document.createElement("div");
+    wrap.innerHTML = `<div class="badge">${name}</div> ${badges.map(b=>`<span class="badge">${b}</span>`).join(" ") || "<span class='badge'>—</span>"}`;
+    badgesBox.appendChild(wrap);
+  });
+
+  const discipline = document.getElementById("disciplineBox");
+  const offenders = PEOPLE.filter(p=>(DB.stats.missed[p]||0)>=5);
+  if(offenders.length){
+    discipline.innerHTML = `
+      <div class="alert">
+        <div class="lock">⛓️🔒</div>
+        <strong>Alerte:</strong> ${offenders.join(", ")} — 5 manquements ou plus.
+        Validez vos tâches pour “déverrouiller” l’accès.
+      </div>`;
+  } else {
+    discipline.innerHTML = `<div class="chip">Aucune alerte. Continuez ainsi 💪</div>`;
+  }
+}
+
+function renderAll(){
+  renderHome();
+  renderActions();
+  renderPlanning();
+  renderKPIs();
+}
+
+async function bootstrap(){
+  if(!DB.meta.generatedAt){ generateYearPlan(); }
+  sweepMissed();
+  try{
+    setSyncState("chargement…");
+    const remote = await REMOTE.load();
+    if(remote){
+      DB = remote;
+      LOCAL.save(DB);
+      setSyncState("à jour");
+    }else{
+      // Première initialisation distante
+      await remoteSaveSafely();
+    }
+  }catch(e){
+    setSyncState("hors-ligne (local)");
+  }
+  document.getElementById("tab-home").onclick = ()=> setActiveTab("home");
+  document.getElementById("tab-actions").onclick = ()=> setActiveTab("actions");
+  document.getElementById("tab-planning").onclick = ()=> setActiveTab("planning");
+  document.getElementById("tab-kpis").onclick = ()=> setActiveTab("kpis");
+  document.getElementById("tab-share").onclick = ()=> setActiveTab("share");
+  renderAll();
+}
+bootstrap();
+setInterval(()=>{ renderHome(); }, 60*1000);
+
+/* === Export / Import JSON === */
+document.getElementById("btnExport").onclick = ()=>{
+  document.getElementById("jsonBox").value = JSON.stringify(DB, null, 2);
+};
+document.getElementById("btnImport").onclick = async ()=>{
+  try{
+    const obj = JSON.parse(document.getElementById("jsonBox").value || "{}");
+    if(obj && obj.plan){
+      DB = obj;
+      LOCAL.save(DB);
+      renderAll();
+      broadcastDB();
+      await remoteSaveSafely();
+      alert("Import réussi !");
+    } else {
+      alert("JSON invalide (plan manquant).");
+    }
+  }catch(e){ alert("JSON invalide."); }
+};
+
+/* === WebRTC DataChannel (optionnel) === */
+let pc = null, dc = null, isCreator = false;
+
+function resetRTC(){
+  pc = new RTCPeerConnection({iceServers:[{urls:["stun:stun.l.google.com:19302","stun:global.stun.twilio.com:3478"]}]});
+  dc = pc.createDataChannel("poubelles");
+  dc.onopen = ()=> { setLiveStatus("connecté"); sendFullState(); };
+  dc.onclose = ()=> setLiveStatus("non connecté");
+  dc.onmessage = (ev)=> {
+    try{
+      const msg = JSON.parse(ev.data);
+      if(msg.type === "STATE"){
+        DB = msg.payload;
+        LOCAL.save(DB);
+        renderAll();
+        remoteSaveSafely();
+      }
+    }catch(e){}
+  };
+  pc.onicecandidate = (ev)=>{
+    if(ev.candidate) return;
+    document.getElementById("sdpLocal").value = JSON.stringify(pc.localDescription);
+  };
+  pc.ondatachannel = (ev)=> {
+    dc = ev.channel;
+    dc.onopen = ()=> { setLiveStatus("connecté"); sendFullState(); };
+    dc.onmessage = (ev)=> {
+      try{
+        const msg = JSON.parse(ev.data);
+        if(msg.type === "STATE"){
+          DB = msg.payload;
+          LOCAL.save(DB);
+          renderAll();
+          remoteSaveSafely();
+        }
+      }catch(e){}
+    };
+  };
+  pc.oniceconnectionstatechange = () => {
+    if (pc.iceConnectionState === "failed") {
+      setLiveStatus("échec de connexion");
+      resetRTC();
+    }
+  };
+}
+
+function setLiveStatus(txt){
+  const el = document.getElementById("liveStatus");
+  el.textContent = "Statut: " + txt;
+}
+
+function sendFullState(){
+  if(dc && dc.readyState === "open"){
+    dc.send(JSON.stringify({type:"STATE", payload:DB}));
+  }
+}
+function broadcastDB(){ sendFullState(); }
+
+document.getElementById("btnCreateOffer").onclick = async ()=>{
+  isCreator = true;
+  resetRTC();
+  const offer = await pc.createOffer({offerToReceiveAudio:false,offerToReceiveVideo:false});
+  await pc.setLocalDescription(offer);
+  setLiveStatus("offre créée — copiez et envoyez");
+};
+document.getElementById("btnAcceptOffer").onclick = ()=>{
+  isCreator = false;
+  resetRTC();
+  setLiveStatus("prêt à accepter une offre");
+};
+document.getElementById("btnCopyLocal").onclick = ()=>{
+  const txt = document.getElementById("sdpLocal").value;
+  navigator.clipboard.writeText(txt).then(()=> alert("Copié !"));
+};
+document.getElementById("btnSetRemote").onclick = async ()=>{
+  try{
+    const remote = JSON.parse(document.getElementById("sdpRemote").value);
+    await pc.setRemoteDescription(remote);
+    if(remote.type === "offer"){
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+      setLiveStatus("réponse créée — copiez et renvoyez");
+    } else {
+      setLiveStatus("tentative de connexion…");
+    }
+  }catch(e){
+    alert("Code invalide (SDP).");
+  }
+};
+</script>
+</body>
+</html>
