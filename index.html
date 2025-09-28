@@ -350,28 +350,36 @@ function renderLegend(){
 }
 
 function renderWeeks(){
-  if(FUTURE_MONTHS.length===0)return;
-  const names=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
-  const current=FUTURE_MONTHS[currentMonthIndex];
-  document.getElementById("monthLabel").textContent=`${names[current.monthIdx]} ${current.year}`;
-  const cont=document.getElementById("weeksContainer");cont.innerHTML="";
+  const cont=document.getElementById("weeksContainer");
+  cont.innerHTML="";
   const today=new Date();
 
-  current.weeks.forEach((w,i)=>{
-    const weekEnd = addDays(w.weekStart,7);
-    if(weekEnd < today) return; // ⬅️ ignore les semaines déjà passées
+  // On récupère toutes les semaines du plan (mois futurs inclus)
+  let allWeeks = [];
+  FUTURE_MONTHS.forEach(m => allWeeks.push(...m.weeks));
 
-    const wrap=document.createElement("div");wrap.className="week"+(w.isLibre?" libre":"");
+  // On garde uniquement les semaines pas encore terminées
+  allWeeks = allWeeks.filter(w => addDays(w.weekStart,7) >= today);
+
+  // On prend seulement la semaine actuelle + 5 suivantes (max 6 semaines)
+  const next6 = allWeeks.slice(0,6);
+
+  next6.forEach((w,i)=>{
+    const wrap=document.createElement("div");
+    wrap.className="week"+(w.isLibre?" libre":"");
     const range=weekRange(w.weekStart);
     const tagColor=colorFor(w.responsible);
+
     wrap.innerHTML=`<h3>
       <span>Semaine ${i+1} — <span class="tag" style="border-color:${tagColor};color:${tagColor}">${w.responsible}</span></span>
       <span class="range">${range}</span>
     </h3>`;
+
     w.tasks.forEach(t=>{
       const d=new Date(t.date);
       const dd=fmtDate(d);
-      const row=document.createElement("div");row.className="task";
+      const row=document.createElement("div");
+      row.className="task";
       if(isSameDay(d,today)) row.classList.add("today");
       row.innerHTML=`
         <div class="left">
@@ -388,6 +396,7 @@ function renderWeeks(){
     cont.appendChild(wrap);
   });
 }
+
 
 /* == Notifications locales == */
 let notificationsEnabled = false;
