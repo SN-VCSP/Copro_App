@@ -2,13 +2,16 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Poubelles Copro</title>
+  <title>Poubelles Copro — améliorée</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
   <style>
     :root{
       --bg1:#3ea76a; --bg2:#a7f3d0; /* vert poubelle clair */
       --card:#0b1225; --text:#f8fafc; --muted:#cbd5e1;
-      --ring:#334155;
+      --ring:#334155; --accent:#facc15;
+      --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
+      /* Couleurs par responsable */
+      --sofienn:#22c55e; --vanessa:#3b82f6; --anthony:#f59e0b; --marc:#8b5cf6; --libre:#64748b;
     }
     *{box-sizing:border-box}
     html,body{
@@ -30,9 +33,17 @@
     nav button{
       flex:1;padding:8px;border:1px solid rgba(255,255,255,.2);
       border-radius:10px;background:rgba(0,0,0,.25);color:var(--text);
-      font-weight:600;font-size:14px;transition:all .2s
+      font-weight:600;font-size:14px;transition:all .2s;cursor:pointer;
     }
     nav button.active{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.5) inset}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{
+      padding:8px 10px;border:1px solid rgba(255,255,255,.2);
+      border-radius:10px;background:#0b1225;color:var(--text);cursor:pointer;font-weight:600;
+    }
+    .btn.secondary{background:#0f172a}
+    .btn.success{background:#14532d}
+    .btn.warn{background:#7c2d12}
     main{padding:12px}
     .card{
       background:rgba(11,18,37,.85);
@@ -46,14 +57,25 @@
     .hero-center{text-align:center;padding:20px}
     .hero-center h2{margin:6px 0;font-size:20px}
     .hero-center .date{font-size:14px;color:#d1d5db;margin-bottom:8px}
-    .hero-center .week{font-size:16px;color:#facc15;margin-bottom:12px}
-    .hero-center .resp{font-size:24px;font-weight:700;margin-bottom:12px}
+    .hero-center .week{font-size:16px;color:var(--accent);margin-bottom:12px}
+    .hero-center .resp{font-size:24px;font-weight:700;margin-bottom:8px}
+    .hero-center .resp .tag{
+      padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.2);margin-left:6px;font-size:.9rem
+    }
     .hero-center .nextTask, .hero-center .nextWeek{font-size:14px;color:#d1d5db;margin-top:6px}
+    .countdown{
+      margin-top:10px;font-weight:700;font-size:18px
+    }
+    .progress-wrap{margin-top:10px;background:#0f172a;border-radius:999px;height:10px;overflow:hidden;border:1px solid var(--ring)}
+    .progress{height:100%;width:0%}
 
     /* Planning */
+    .month-bar{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap
+    }
     .month-nav{
       display:flex;align-items:center;justify-content:center;gap:10px;
-      font-weight:700;margin-bottom:8px;font-size:16px;flex-wrap:wrap
+      font-weight:700;font-size:16px;flex-wrap:wrap
     }
     .month-nav button{
       background:#0f172a;border:none;color:#fff;cursor:pointer;
@@ -63,17 +85,36 @@
       background:#1e293b;border:1px solid var(--ring);
       border-radius:10px;padding:10px;margin-bottom:8px
     }
-    .week h3{margin:0 0 6px 0;font-size:14px;color:#facc15}
+    .week h3{margin:0 0 6px 0;font-size:14px;color:var(--accent);display:flex;align-items:center;gap:8px;justify-content:space-between}
+    .week .range{color:#cbd5e1;font-weight:500}
+    .tag{
+      padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.2)
+    }
     .week.libre{background:#374151}
-    .week h3.libre{color:#f87171} /* rouge pour LIBRE */
-    .task{margin:3px 0;padding:4px 6px;border-radius:6px;background:#0b1225;font-size:13px}
+    .task{
+      margin:4px 0;padding:6px 8px;border-radius:6px;background:#0b1225;font-size:13px;display:flex;align-items:center;justify-content:space-between;border:1px solid transparent
+    }
+    .task .left{display:flex;align-items:center;gap:8px}
+    .task .when{color:#cbd5e1;font-size:12px}
+    .task.today{border-color:var(--accent);box-shadow:0 0 0 1px rgba(250,204,21,.4)}
+    .task .badge{
+      padding:2px 6px;border-radius:6px;border:1px solid rgba(255,255,255,.15);font-size:12px
+    }
+
+    .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .legend .pill{
+      display:flex;gap:6px;align-items:center;background:#0b1225;border:1px solid var(--ring);border-radius:999px;padding:4px 8px;font-size:12px
+    }
+
+    /* Modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:60}
+    .modal.open{display:flex}
+    .modal .box{background:#0b1225;border:1px solid var(--ring);border-radius:14px;max-width:680px;width:90%;padding:16px}
+    .modal .box h3{margin:0 0 8px 0}
+    .modal .box .close{float:right;cursor:pointer;border:none;background:#0f172a;color:#fff;border-radius:8px;padding:6px 10px}
 
     .footer{padding:10px;color:#e2e8f0;font-size:11px;text-align:center}
-    @media(max-width:500px){
-      .hero-center h2{font-size:18px}
-      .hero-center .resp{font-size:20px}
-      .task{font-size:12px}
-    }
+    /* (Pas d'amélioration responsive supplémentaire) */
   </style>
 </head>
 <body>
@@ -86,6 +127,10 @@
       <button id="tab-home" class="active">Accueil</button>
       <button id="tab-planning">Planning</button>
     </nav>
+    <div class="actions">
+      <button id="notifyToggle" class="btn secondary">🔔 Activer rappels</button>
+      <button id="openRules" class="btn">ℹ️ Règles</button>
+    </div>
   </header>
 
   <main>
@@ -95,6 +140,12 @@
         <div class="date" id="todayText">—</div>
         <div class="week" id="weekInfo">—</div>
         <div class="resp" id="heroWho">Responsable: —</div>
+
+        <div class="countdown" id="countdown">—</div>
+        <div class="progress-wrap" aria-label="Progression de la semaine">
+          <div id="weekProgress" class="progress"></div>
+        </div>
+
         <div class="nextTask" id="heroTask">Prochaine tâche: —</div>
         <div class="nextWeek" id="nextResp">Prochaine semaine: —</div>
       </div>
@@ -103,11 +154,18 @@
     <!-- Planning -->
     <section id="planning" class="tabs">
       <div class="card">
-        <div class="month-nav">
-          <button id="prevMonth">◀️</button>
-          <span id="monthLabel">—</span>
-          <button id="nextMonth">▶️</button>
+        <div class="month-bar">
+          <div class="month-nav">
+            <button id="prevMonth">◀️</button>
+            <span id="monthLabel">—</span>
+            <button id="nextMonth">▶️</button>
+          </div>
+          <div class="actions">
+            <button id="exportWeek" class="btn success">📅 Exporter semaine</button>
+            <button id="exportMonth" class="btn success">📅 Exporter mois</button>
+          </div>
         </div>
+        <div id="legend" class="legend"></div>
         <div id="weeksContainer"></div>
       </div>
     </section>
@@ -115,9 +173,31 @@
 
   <div class="footer">Règle: 1er lundi → Sofienn, puis Vanessa, Anthony, Marc. 5e semaine = LIBRE.</div>
 
+  <!-- Modal Règles -->
+  <div id="rulesModal" class="modal" aria-hidden="true">
+    <div class="box">
+      <button class="close" id="closeRules">Fermer</button>
+      <h3>Règles de la copro — gestion des poubelles</h3>
+      <ul>
+        <li>Le responsable de la semaine est défini par l’ordre : <b>Sofienn → Vanessa → Anthony → Marc</b>, à partir du <b>1er lundi</b> du mois.</li>
+        <li>La <b>5e semaine</b> (si elle existe) est <b>LIBRE</b> : chacun reste vigilant.</li>
+        <li>Tâches : <b>Sortie</b> mardi & vendredi 18h, <b>Rentrée</b> mercredi & samedi 8h.</li>
+        <li>En cas d’empêchement, essayez d’échanger en direct (sans passer par l’appli).</li>
+      </ul>
+      <p style="color:#cbd5e1;font-size:14px">Un cadenas sera ajouté en cas de manquement à vos obligations </p>
+    </div>
+  </div>
+
 <script>
 /* === Données === */
 const PEOPLE=["Sofienn","Vanessa","Anthony","Marc"];
+const PERSON_COLORS={
+  "Sofienn":"var(--sofienn)",
+  "Vanessa":"var(--vanessa)",
+  "Anthony":"var(--anthony)",
+  "Marc":"var(--marc)",
+  "LIBRE":"var(--libre)"
+};
 const TASKS=[
   {icon:"🗑️",label:"Sortie",whenLabel:"Mardi soir",dow:2,time:"18:00"},
   {icon:"🏠",label:"Rentrée",whenLabel:"Mercredi matin",dow:3,time:"08:00"},
@@ -128,10 +208,14 @@ const TASKS=[
 /* Helpers */
 function pad(n){return n<10?"0"+n:n;}
 function fmtDate(d){return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;}
+function fmtTime(d){return `${pad(d.getHours())}:${pad(d.getMinutes())}`;}
 function startOfDay(d){const x=new Date(d);x.setHours(0,0,0,0);return x;}
+function endOfDay(d){const x=new Date(d);x.setHours(23,59,59,999);return x;}
 function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
 function setTime(d,hhmm){const x=new Date(d);const [hh,mm]=hhmm.split(":").map(Number);x.setHours(hh||0,mm||0,0,0);return x;}
 function firstMondayOfMonth(y,m){const d=new Date(y,m,1);const day=d.getDay();const off=(day===0)?1:(day===1?0:(8-day)%7);d.setDate(d.getDate()+off);return startOfDay(d);}
+function weekRange(ws){const we=addDays(ws,6);return `${fmtDate(ws)} → ${fmtDate(we)}`;}
+function isSameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
 
 /* Planning */
 let PLAN=[], FUTURE_MONTHS=[], currentMonthIndex=0;
@@ -197,51 +281,255 @@ function setActiveTab(tab){
   document.getElementById(`tab-${tab}`).classList.add("active");
   document.getElementById(tab).classList.add("active");
 }
+
+function colorFor(person){return PERSON_COLORS[person]||"var(--libre)";}
+
 function renderHome(){
   const now=new Date();
-  document.getElementById("todayText").textContent=`Aujourd'hui : ${fmtDate(now)}`;
+  document.getElementById("todayText").textContent=`Aujourd'hui : ${fmtDate(now)} (${["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"][now.getDay()]})`;
   const cw=findCurrentWeek();
   if(cw){
     document.getElementById("weekInfo").textContent=`Semaine ${cw.index}`;
-    document.getElementById("heroWho").textContent=`Responsable: ${cw.responsible}`;
+    const tag=`<span class="tag" style="border-color:${colorFor(cw.responsible)};color:${colorFor(cw.responsible)}">${cw.responsible}</span>`;
+    document.getElementById("heroWho").innerHTML=`Responsable: ${tag}`;
   }
   const nt=findNextTask();
   if(nt){
-    document.getElementById("heroTask").textContent=`Prochaine tâche: ${nt.icon} ${nt.label} — ${nt.whenLabel} (${fmtDate(new Date(nt.date))}) • ${nt.who}`;
+    document.getElementById("heroTask").textContent=`Prochaine tâche: ${nt.icon} ${nt.label} — ${nt.whenLabel} (${fmtDate(new Date(nt.date))} ${fmtTime(new Date(nt.date))}) • ${nt.who}`;
+    updateCountdown(nt.date);
+  } else {
+    document.getElementById("countdown").textContent="Aucune tâche à venir.";
   }
   const nw=findNextWeek(cw);
   if(nw){
     document.getElementById("nextResp").textContent=`Prochaine semaine: ${nw.responsible}`;
   }
+  updateWeekProgress();
 }
+
+function updateWeekProgress(){
+  const now=new Date();
+  const monday=addDays(startOfDay(now), (1 - (now.getDay()||7))); // lundi de cette semaine
+  const total=7*24*60*60*1000;
+  const elapsed=now - monday;
+  let ratio=Math.max(0, Math.min(1, elapsed/total));
+  const bar=document.getElementById("weekProgress");
+  bar.style.width = (ratio*100).toFixed(1)+"%";
+  bar.style.background = `linear-gradient(90deg, var(--ok), var(--warn), var(--danger))`;
+}
+
+let countdownTimer=null;
+function updateCountdown(target){
+  clearInterval(countdownTimer);
+  function tick(){
+    const now=new Date();
+    const diff=target-now;
+    if(diff<=0){
+      document.getElementById("countdown").textContent="C'est maintenant !";
+      clearInterval(countdownTimer);
+      return;
+    }
+    const h=Math.floor(diff/3.6e6);
+    const m=Math.floor((diff%3.6e6)/6e4);
+    const s=Math.floor((diff%6e4)/1e3);
+    document.getElementById("countdown").textContent=`⏳ Prochaine tâche dans ${h}h ${m}m ${s}s`;
+  }
+  tick();
+  countdownTimer=setInterval(tick,1000);
+}
+
+function renderLegend(){
+  const el=document.getElementById("legend");
+  el.innerHTML="";
+  ["Sofienn","Vanessa","Anthony","Marc","LIBRE"].forEach(p=>{
+    const pill=document.createElement("div");
+    pill.className="pill";
+    pill.innerHTML=`<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${colorFor(p)}"></span>${p}`;
+    el.appendChild(pill);
+  });
+}
+
 function renderWeeks(){
   if(FUTURE_MONTHS.length===0)return;
   const names=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
   const current=FUTURE_MONTHS[currentMonthIndex];
   document.getElementById("monthLabel").textContent=`${names[current.monthIdx]} ${current.year}`;
   const cont=document.getElementById("weeksContainer");cont.innerHTML="";
+  const today=new Date();
+
   current.weeks.forEach((w,i)=>{
     const wrap=document.createElement("div");wrap.className="week"+(w.isLibre?" libre":"");
-    wrap.innerHTML=`<h3 class="${w.isLibre?"libre":""}">Semaine ${i+1} — ${w.responsible}</h3>`;
+    const range=weekRange(w.weekStart);
+    const tagColor=colorFor(w.responsible);
+    wrap.innerHTML=`<h3>
+      <span>Semaine ${i+1} — <span class="tag" style="border-color:${tagColor};color:${tagColor}">${w.responsible}</span></span>
+      <span class="range">${range}</span>
+    </h3>`;
     w.tasks.forEach(t=>{
-      const dd=fmtDate(new Date(t.date));
+      const d=new Date(t.date);
+      const dd=fmtDate(d);
       const row=document.createElement("div");row.className="task";
-      row.textContent=`${t.icon} ${t.label} (${t.whenLabel}) — ${dd}`;
+      if(isSameDay(d,today)) row.classList.add("today");
+      row.innerHTML=`
+        <div class="left">
+          <span>${t.icon}</span>
+          <div>
+            <div><b>${t.label}</b> — ${t.whenLabel}</div>
+            <div class="when">${dd} • ${fmtTime(d)}</div>
+          </div>
+        </div>
+        <div class="badge" style="border-color:${tagColor};color:${tagColor}">${t.who}</div>
+      `;
       wrap.appendChild(row);
     });
     cont.appendChild(wrap);
   });
 }
 
+/* == Notifications locales == */
+let notificationsEnabled = false;
+function requestNotificationPermission(){
+  if(!("Notification" in window)) return alert("Notifications non supportées par ce navigateur.");
+  if(Notification.permission==="granted"){notificationsEnabled=true;return true;}
+  if(Notification.permission!=="denied"){
+    return Notification.requestPermission().then(p=>{
+      notificationsEnabled=(p==="granted");
+      updateNotifyButton();
+      return notificationsEnabled;
+    });
+  }
+}
+function updateNotifyButton(){
+  const btn=document.getElementById("notifyToggle");
+  btn.textContent = notificationsEnabled ? "🔕 Désactiver rappels" : "🔔 Activer rappels";
+  btn.classList.toggle("warn", notificationsEnabled);
+}
+function scheduleNotifications(){
+  if(!notificationsEnabled) return;
+  // Planifier des rappels pour les 7 prochains jours
+  const now=new Date();
+  const soon=[];
+  PLAN.forEach(m=>m.weeks.forEach(w=>w.tasks.forEach(t=>{
+    const d=new Date(t.date);
+    if(d>now && d-now <= 7*24*3600*1000){ soon.push({t,when:d}); }
+  })));
+  soon.forEach(({t,when})=>{
+    const ms = when - new Date();
+    // sécurité : max 2^31-1 pour setTimeout ~ 24.8 jours
+    setTimeout(()=>{
+      if(notificationsEnabled){
+        new Notification(`${t.icon} ${t.label}`, { body:`${t.whenLabel} • ${fmtDate(when)} ${fmtTime(when)} • ${t.who}` });
+      }
+    }, Math.max(0, Math.min(ms, 2147483647)));
+  });
+}
+
+/* == Export ICS == */
+function toICSDate(dt){ // YYYYMMDDTHHMMSS
+  const y=dt.getFullYear();
+  const mo=pad(dt.getMonth()+1);
+  const da=pad(dt.getDate());
+  const h=pad(dt.getHours());
+  const mi=pad(dt.getMinutes());
+  const s=pad(dt.getSeconds());
+  return `${y}${mo}${da}T${h}${mi}${s}`;
+}
+function generateICS(events, filename="poubelles.ics"){
+  const lines=[
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Poubelles Copro//FR",
+  ];
+  events.forEach(ev=>{
+    const uid=`${ev.start.getTime()}-${Math.random().toString(36).slice(2)}@poubelles-copro`;
+    const dtstart=toICSDate(ev.start);
+    const dtend=toICSDate(ev.end);
+    const summary=ev.summary.replace(/([,;])/g,"\\$1");
+    const desc=(ev.description||"").replace(/([,;])/g,"\\$1");
+    lines.push(
+      "BEGIN:VEVENT",
+      `UID:${uid}`,
+      `DTSTAMP:${toICSDate(new Date())}`,
+      `DTSTART:${dtstart}`,
+      `DTEND:${dtend}`,
+      `SUMMARY:${summary}`,
+      `DESCRIPTION:${desc}`,
+      "END:VEVENT"
+    );
+  });
+  lines.push("END:VCALENDAR");
+  const blob=new Blob([lines.join("\r\n")],{type:"text/calendar"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  URL.revokeObjectURL(a.href);
+  a.remove();
+}
+function collectWeekEvents(week){
+  // chaque tâche = événement de 30 minutes
+  return week.tasks.map(t=>{
+    const start=new Date(t.date);
+    const end=new Date(start.getTime()+30*60000);
+    return {start,end,summary:`${t.icon} ${t.label} — ${t.who}`,description:t.whenLabel};
+  });
+}
+function collectMonthEvents(month){
+  const ev=[];
+  month.weeks.forEach(w=>ev.push(...collectWeekEvents(w)));
+  return ev;
+}
+
+/* == Modale Règles == */
+function openRules(){document.getElementById("rulesModal").classList.add("open");document.getElementById("rulesModal").setAttribute("aria-hidden","false");}
+function closeRules(){document.getElementById("rulesModal").classList.remove("open");document.getElementById("rulesModal").setAttribute("aria-hidden","true");}
+
 /* Init */
 function init(){
-  generateYearPlan();renderHome();renderWeeks();
+  generateYearPlan();
+  renderHome(); renderLegend(); renderWeeks();
+
+  // Onglets
   document.getElementById("tab-home").onclick=()=>setActiveTab("home");
   document.getElementById("tab-planning").onclick=()=>setActiveTab("planning");
+
+  // Navigation mois
   document.getElementById("prevMonth").onclick=()=>{if(currentMonthIndex>0){currentMonthIndex--;renderWeeks();}};
   document.getElementById("nextMonth").onclick=()=>{if(currentMonthIndex<FUTURE_MONTHS.length-1){currentMonthIndex++;renderWeeks();}};
+
+  // Export
+  document.getElementById("exportWeek").onclick=()=>{
+    const cw=findCurrentWeek();
+    if(!cw) return alert("Semaine courante introuvable.");
+    generateICS(collectWeekEvents(cw), `poubelles-semaine-${fmtDate(cw.weekStart).replaceAll('/','')}.ics`);
+  };
+  document.getElementById("exportMonth").onclick=()=>{
+    const m=FUTURE_MONTHS[currentMonthIndex];
+    generateICS(collectMonthEvents(m), `poubelles-${(m.monthIdx+1).toString().padStart(2,'0')}-${m.year}.ics`);
+  };
+
+  // Notifications
+  document.getElementById("notifyToggle").onclick=async ()=>{
+    if(!notificationsEnabled){
+      await requestNotificationPermission();
+      if(notificationsEnabled){ scheduleNotifications(); }
+    }else{
+      notificationsEnabled=false; // simple toggle (pas de service worker)
+    }
+    updateNotifyButton();
+  };
+  updateNotifyButton();
+  scheduleNotifications();
+
+  // Règles
+  document.getElementById("openRules").onclick=openRules;
+  document.getElementById("closeRules").onclick=closeRules;
+
+  // Rafraîchis dynamiques
+  setInterval(()=>{ renderHome(); }, 60_000); // minute
 }
-init();setInterval(()=>{renderHome();},60000);
+init();
 </script>
 </body>
 </html>
