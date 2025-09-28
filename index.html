@@ -2,491 +2,246 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Poubelles Copro 9</title>
+  <title>Poubelles Copro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
   <style>
     :root{
-      --bg1:#1e1b4b; --bg2:#0ea5e9;
-      --card:#111827; --text:#f8fafc; --muted:#cbd5e1;
-      --chip:#1f2937; --ring:#334155;
-      --accent:#22c55e; --accent2:#f59e0b; --accent3:#06b6d4;
-      --danger:#ef4444; --warn:#f59e0b;
+      --bg1:#3ea76a; --bg2:#a7f3d0; /* vert poubelle clair */
+      --card:#0b1225; --text:#f8fafc; --muted:#cbd5e1;
+      --ring:#334155;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;background:linear-gradient(135deg,var(--bg1),#3b82f6,var(--bg2));color:var(--text)}
+    html,body{
+      margin:0;padding:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(135deg,var(--bg1),var(--bg2));
+      color:var(--text)
+    }
     header{
       position:sticky;top:0;z-index:50;
-      background:linear-gradient(90deg,#7c3aed,#06b6d4);
+      background:linear-gradient(90deg,#22c55e,#84cc16);
       padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.2);
-      display:flex;gap:12px;align-items:center;justify-content:space-between
+      display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap
     }
-    .brand{display:flex;align-items:center;gap:10px}
-    .logo{width:38px;height:38px;border-radius:12px;background:conic-gradient(#22c55e,#f59e0b,#06b6d4,#ef4444,#22c55e);box-shadow:0 6px 24px rgba(0,0,0,.3)}
-    .brand h1{margin:0;font-size:18px}
-    .today{font-size:12px;color:#e2e8f0}
-    nav{display:flex;gap:8px}
-    nav button{flex:1;padding:10px 12px;border:1px solid rgba(255,255,255,.2);border-radius:12px;background:rgba(0,0,0,.25);color:var(--text);font-weight:700}
-    nav button.active{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.2) inset}
-    main{padding:16px}
-    .card{background:rgba(17,24,39,.75);backdrop-filter:blur(6px);border:1px solid var(--ring);border-radius:16px;padding:14px;margin-bottom:16px}
-    .hero{display:flex;gap:12px;align-items:center}
-    .hero-avatar{width:62px;height:62px;border-radius:50%;background:radial-gradient(circle,#22c55e,#06b6d4,#f59e0b);box-shadow:0 10px 30px rgba(0,0,0,.35)}
-    .hero h2{margin:0 0 4px 0;font-size:18px}
-    .hero .sub{color:var(--muted);font-size:12px}
-    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-    .chip{background:var(--chip);border:1px solid var(--ring);border-radius:999px;padding:6px 10px;font-size:12px}
-    .section-title{font-weight:800;margin:0 0 8px 0;font-size:14px;color:#e2e8f0}
-    .big-action{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
-    .big-btn{width:100%;padding:14px;border-radius:16px;border:1px solid var(--ring);
-      background:linear-gradient(180deg,#1f2937 0%, #0f172a 100%);color:var(--text);font-weight:800;font-size:16px}
-    .big-btn.done{background:linear-gradient(180deg,#22c55e 0%, #16a34a 100%);border-color:#16a34a;color:#04210f}
-    .progress{width:100%;height:10px;border-radius:999px;background:#0b1225;border:1px solid var(--ring);overflow:hidden}
-    .progress > span{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#06b6d4)}
-    .task-row{display:flex;align-items:center;justify-content:space-between;background:#0b1225;border:1px solid var(--ring);border-radius:12px;padding:10px;margin:6px 0}
-    .task-row .name{font-weight:800}
-    .task-row .when{color:var(--muted);font-size:12px}
-    .task-row button{padding:8px 10px;border-radius:10px;border:1px solid var(--ring);background:#1f2937;color:var(--text);font-weight:700}
-    .task-row button.done{background:#16a34a;border-color:#16a34a;color:#052e13}
-    .task-row button.change{background:#f59e0b;border-color:#c2410c}
-    .task-row button.assign{background:#06b6d4;border-color:#0e7490}
-    .alert{margin-top:8px;padding:10px;border-radius:12px;border:1px solid var(--danger);color:#fecaca;background:#2b0b0b}
-    .lock{font-size:40px;line-height:1}
-    .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .kpi{background:#0b1225;border:1px solid var(--ring);border-radius:12px;padding:10px}
-    .kpi h3{margin:0 0 6px 0;font-size:14px}
-    .kpi .val{font-size:22px;font-weight:800}
-    .legend{font-size:12px;color:var(--muted)}
-    .tabs{display:none}
-    .tabs.active{display:block}
-    .month-title{margin:12px 0 6px 0;font-weight:800;color:#cbd5e1}
-    .week{margin-bottom:12px;border:1px solid var(--ring);border-radius:12px;padding:10px}
-    .week-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-    .footer{padding:12px;color:#e2e8f0;font-size:12px;text-align:center}
-    textarea, select, input{width:100%;padding:8px;border-radius:10px;border:1px solid var(--ring);background:#0b1225;color:var(--text)}
-    .row{display:flex;gap:8px}
-    .row > *{flex:1}
-    .badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#1f2937;border:1px solid var(--ring);margin:4px 4px 0 0;font-size:12px}
-    @media (max-width: 600px) {
-      .kpi-grid { grid-template-columns: 1fr; }
-      .row > * { flex: none; width: 100%; }
+    .brand{display:flex;align-items:center;gap:10px;flex:1}
+    .logo{width:32px;height:32px;border-radius:10px;background:conic-gradient(#22c55e,#f59e0b,#06b6d4,#84cc16)}
+    .brand h1{margin:0;font-size:16px}
+    nav{display:flex;gap:8px;margin-top:6px}
+    nav button{
+      flex:1;padding:8px;border:1px solid rgba(255,255,255,.2);
+      border-radius:10px;background:rgba(0,0,0,.25);color:var(--text);
+      font-weight:600;font-size:14px;transition:all .2s
+    }
+    nav button.active{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.5) inset}
+    main{padding:12px}
+    .card{
+      background:rgba(11,18,37,.85);
+      backdrop-filter:blur(6px);
+      border:1px solid var(--ring);
+      border-radius:14px;
+      padding:14px;margin-bottom:14px
+    }
+
+    /* Accueil */
+    .hero-center{text-align:center;padding:20px}
+    .hero-center h2{margin:6px 0;font-size:20px}
+    .hero-center .date{font-size:14px;color:#d1d5db;margin-bottom:8px}
+    .hero-center .week{font-size:16px;color:#facc15;margin-bottom:12px}
+    .hero-center .resp{font-size:24px;font-weight:700;margin-bottom:12px}
+    .hero-center .nextTask, .hero-center .nextWeek{font-size:14px;color:#d1d5db;margin-top:6px}
+
+    /* Planning */
+    .month-nav{
+      display:flex;align-items:center;justify-content:center;gap:10px;
+      font-weight:700;margin-bottom:8px;font-size:16px;flex-wrap:wrap
+    }
+    .month-nav button{
+      background:#0f172a;border:none;color:#fff;cursor:pointer;
+      border-radius:8px;padding:4px 8px;font-size:15px
+    }
+    .week{
+      background:#1e293b;border:1px solid var(--ring);
+      border-radius:10px;padding:10px;margin-bottom:8px
+    }
+    .week h3{margin:0 0 6px 0;font-size:14px;color:#facc15}
+    .week.libre{background:#374151}
+    .week h3.libre{color:#f87171} /* rouge pour LIBRE */
+    .task{margin:3px 0;padding:4px 6px;border-radius:6px;background:#0b1225;font-size:13px}
+
+    .footer{padding:10px;color:#e2e8f0;font-size:11px;text-align:center}
+    @media(max-width:500px){
+      .hero-center h2{font-size:18px}
+      .hero-center .resp{font-size:20px}
+      .task{font-size:12px}
     }
   </style>
 </head>
 <body>
   <header>
     <div class="brand">
-      <div class="logo" aria-hidden="true"></div>
-      <div>
-        <h1>🚮 Poubelles Copro — Gestion collaborative</h1>
-        <div class="today" id="todayText">—</div>
-      </div>
+      <div class="logo"></div>
+      <h1>🚮 Poubelles Copro</h1>
     </div>
     <nav>
-      <button id="tab-home" class="active" aria-label="Onglet Accueil">Accueil</button>
-      <button id="tab-actions" aria-label="Onglet Actions">Actions</button>
-      <button id="tab-planning" aria-label="Onglet Planning">Planning</button>
-      <button id="tab-kpis" aria-label="Onglet Performances">Performances</button>
+      <button id="tab-home" class="active">Accueil</button>
+      <button id="tab-planning">Planning</button>
     </nav>
   </header>
 
   <main>
     <!-- Accueil -->
     <section id="home" class="tabs active">
-      <div class="card hero">
-        <div class="hero-avatar" aria-hidden="true"></div>
-        <div>
-          <h2 id="heroWho">Responsable actuel: —</h2>
-          <div class="sub" id="heroTask">Prochaine tâche: —</div>
-          <div class="chips" id="heroChips"></div>
-        </div>
-      </div>
-      <div class="card">
-        <p class="section-title">Règles du jeu</p>
-        <div class="chips">
-          <span class="chip">Tour de rôle: 2 fois/semaine</span>
-          <span class="chip">Semaine 1 du mois: Sofienn</span>
-          <span class="chip">Mardi soir & Vendredi soir: sortie</span>
-          <span class="chip">Mercredi matin & Samedi matin: rentrée</span>
-          <span class="chip">Semaine 5: libre (non attribuée)</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Actions -->
-    <section id="actions" class="tabs">
-      <div class="card big-action">
-        <p class="section-title">Bouton central</p>
-        <button id="bigActionBtn" class="big-btn">Marquer la tâche du moment comme accomplie</button>
-        <div class="progress"><span id="weekProgress" style="width:0%"></span></div>
-        <div class="legend" id="weekLegend">Progression de la semaine: 0/4</div>
-      </div>
-      <div class="card">
-        <p class="section-title">Tâches de la semaine</p>
-        <div id="currentWeekTasks"></div>
+      <div class="card hero-center">
+        <div class="date" id="todayText">—</div>
+        <div class="week" id="weekInfo">—</div>
+        <div class="resp" id="heroWho">Responsable: —</div>
+        <div class="nextTask" id="heroTask">Prochaine tâche: —</div>
+        <div class="nextWeek" id="nextResp">Prochaine semaine: —</div>
       </div>
     </section>
 
     <!-- Planning -->
     <section id="planning" class="tabs">
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <p class="section-title">Planning 12 mois</p>
-          <button id="regeneratePlanBtn" class="big-btn">Regénérer le planning</button>
+        <div class="month-nav">
+          <button id="prevMonth">◀️</button>
+          <span id="monthLabel">—</span>
+          <button id="nextMonth">▶️</button>
         </div>
-        <div id="planContainer"></div>
-      </div>
-    </section>
-
-    <!-- Performances -->
-    <section id="kpis" class="tabs">
-      <div class="card">
-        <p class="section-title">Indicateurs & classement</p>
-        <div class="kpi-grid" id="kpiGrid"></div>
-        <div id="badgesBox" style="margin-top:10px"></div>
+        <div id="weeksContainer"></div>
       </div>
     </section>
   </main>
 
-  <div class="footer">Données en localStorage. Rotation: Sofienn, Vanessa, Anthony, Marc. Semaine 5 libre.</div>
+  <div class="footer">Règle: 1er lundi → Sofienn, puis Vanessa, Anthony, Marc. 5e semaine = LIBRE.</div>
 
 <script>
-/* ==========================
-   CONFIG — À RENSEIGNER
-   ========================== */
-// 1) Déployez le script Google Apps Script fourni (Code.gs) en "Application Web"
-// 2) Collez ici l’URL de l’application web:
-const API_BASE = "https://script.google.com/macros/s/AKfycbx9QL3i9DQP6pI2GyVwPchdSEjkEDHWYSvtJGoNpWALZ9w88bE2WYwaMNIVmSbS_9NzJg/exec"; // ex: https://script.google.com/macros/s/AKfycb.../exec
-
-/* === Données de base === */
-const PEOPLE = ["Sofienn","Vanessa","Anthony","Marc"];
-const TASKS = [
-  {key:"TUE_PM", icon:"🗑️", label:"Sortir la poubelle", whenLabel:"Mardi soir", dow:2, time:"18:00"},
-  {key:"WED_AM", icon:"🏠", label:"Rentrer la poubelle", whenLabel:"Mercredi matin", dow:3, time:"08:00"},
-  {key:"FRI_PM", icon:"🗑️", label:"Sortir la poubelle", whenLabel:"Vendredi soir", dow:5, time:"18:00"},
-  {key:"SAT_AM", icon:"🏠", label:"Rentrer la poubelle", whenLabel:"Samedi matin", dow:6, time:"08:00"},
+/* === Données === */
+const PEOPLE=["Sofienn","Vanessa","Anthony","Marc"];
+const TASKS=[
+  {icon:"🗑️",label:"Sortie",whenLabel:"Mardi soir",dow:2,time:"18:00"},
+  {icon:"🏠",label:"Rentrée",whenLabel:"Mercredi matin",dow:3,time:"08:00"},
+  {icon:"🗑️",label:"Sortie",whenLabel:"Vendredi soir",dow:5,time:"18:00"},
+  {icon:"🏠",label:"Rentrée",whenLabel:"Samedi matin",dow:6,time:"08:00"},
 ];
 
-/* === Stockage local === */
-const STORE = {
-  load(){ try { return JSON.parse(localStorage.getItem("poubelle_copro_store")||"{}"); } catch(e){ return {}; } },
-  save(data){ localStorage.setItem("poubelle_copro_store", JSON.stringify(data)); }
-};
-let DB = STORE.load();
-if(!DB.meta){ DB.meta = {generatedAt: null, lastSweep: null}; }
-if(!DB.plan){ DB.plan = []; }
-if(!DB.done){ DB.done = {}; }
-if(!DB.missed){ DB.missed = {}; }
-if(!DB.stats){ DB.stats = {completed:{}, missed:{}, points:{}, streak:{}}; }
-if(!DB.changes){ DB.changes = {}; }
+/* Helpers */
+function pad(n){return n<10?"0"+n:n;}
+function fmtDate(d){return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;}
+function startOfDay(d){const x=new Date(d);x.setHours(0,0,0,0);return x;}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
+function setTime(d,hhmm){const x=new Date(d);const [hh,mm]=hhmm.split(":").map(Number);x.setHours(hh||0,mm||0,0,0);return x;}
+function firstMondayOfMonth(y,m){const d=new Date(y,m,1);const day=d.getDay();const off=(day===0)?1:(day===1?0:(8-day)%7);d.setDate(d.getDate()+off);return startOfDay(d);}
 
-/* === Date helpers === */
-function pad(n){ return n<10 ? "0"+n : ""+n; }
-function fmtDate(d){ return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`; }
-function startOfDay(d){ const x=new Date(d); x.setHours(0,0,0,0); return x; }
-function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
-function setTime(d,hhmm){ const x=new Date(d); const [hh,mm]=hhmm.split(":").map(Number); x.setHours(hh||0,mm||0,0,0); return x; }
-function firstMondayOfMonth(year, monthIndex){
-  const d = new Date(year, monthIndex, 1);
-  const day = d.getDay();
-  const offset = (day === 0) ? 1 : (day === 1 ? 0 : (8 - day) % 7);
-  d.setDate(d.getDate() + offset);
-  return startOfDay(d);
-}
-
-/* === Génération du planning 12 mois === */
-function generateYearPlan(){
-  const now = new Date();
-  const startYear = now.getFullYear();
-  const startMonth = now.getMonth();
-  const plan = [];
-  for(let m=0;m<12;m++){
-    const year = startMonth+m >= 12 ? startYear+1 : startYear;
-    const monthIdx = (startMonth+m) % 12;
-    const monthStartMonday = firstMondayOfMonth(year, monthIdx);
-    const weeks = [];
-    for(let w=0; w<5; w++){
-      const weekStart = addDays(monthStartMonday, 7*w);
-      if(weekStart.getMonth() !== monthIdx && w>0) break;
-      const assigned = (w === 4) ? null : (w === 0 ? PEOPLE[0] : PEOPLE[(w % PEOPLE.length)]);
-      const tasks = TASKS.map(t=>{
-        const delta = (t.dow + 7 - 1) % 7;
-        const d = addDays(weekStart, delta);
-        const dt = setTime(d, t.time);
-        const id = `Y${year}M${monthIdx+1}W${w+1}_${t.key}`;
-        return { id, person: assigned, label: t.label, icon: t.icon, whenLabel: t.whenLabel, date: dt.toISOString(), y: year, m: monthIdx+1, w: w+1, key: t.key };
-      });
-      weeks.push({year, monthIdx, w: w+1, assigned, weekStart, tasks});
-    }
-    plan.push({year, monthIdx, weeks});
-  }
-  DB.plan = plan;
-  DB.meta.generatedAt = new Date().toISOString();
-  STORE.save(DB);
-  renderPlanning();
-}
-
-/* === Gamification === */
-function addPoints(person, pts){
-  if(!person) return;
-  DB.stats.points[person] = (DB.stats.points[person]||0) + pts;
-  DB.stats.streak[person] = (DB.stats.streak[person]||0) + 1;
-  STORE.save(DB);
-}
-function breakStreak(person){
-  if(!person) return;
-  DB.stats.streak[person] = 0;
-  STORE.save(DB);
-}
-
-/* === Trouver la tâche actuelle et la semaine === */
-function findCurrentTask(){
-  const now = new Date();
-  let nearest = null;
-  DB.plan.forEach(month=>{
-    month.weeks.forEach(w=>{
-      w.tasks.forEach(t=>{
-        const dt = new Date(t.date);
-        const diff = dt - now;
-        if(diff >= -6*60*60*1000){
-          if(!nearest || diff < (new Date(nearest.date)-now)) nearest = t;
-        }
-      });
+/* Planning */
+let PLAN=[], FUTURE_MONTHS=[], currentMonthIndex=0;
+function buildMonth(year,monthIdx){
+  const firstMon=firstMondayOfMonth(year,monthIdx);
+  const weeks=[];
+  for(let w=0;w<5;w++){
+    const ws=addDays(firstMon,7*w);
+    if(ws.getMonth()!==monthIdx && w>0) break;
+    let responsible=null;
+    if(w<4) responsible=PEOPLE[w];
+    const tasks=TASKS.map(t=>{
+      const delta=(t.dow+6)%7;
+      const dd=addDays(ws,delta);
+      return {date:setTime(dd,t.time),icon:t.icon,label:t.label,whenLabel:t.whenLabel,who:responsible||"LIBRE"};
     });
+    weeks.push({weekStart:ws,responsible:responsible||"LIBRE",isLibre:!responsible,tasks});
+  }
+  return {year,monthIdx,weeks};
+}
+function generateYearPlan(){
+  const now=new Date();const y0=now.getFullYear();const m0=now.getMonth();const plan=[];
+  for(let i=0;i<12;i++){
+    const y=(m0+i>=12)?y0+1:y0;const m=(m0+i)%12;
+    plan.push(buildMonth(y,m));
+  }
+  PLAN=plan;
+  FUTURE_MONTHS=PLAN.filter(m=>{
+    const nm=new Date();
+    return (m.year>nm.getFullYear())||(m.year===nm.getFullYear()&&m.monthIdx>=nm.getMonth());
   });
+}
+
+/* Trouver semaine actuelle et prochaine tâche */
+function findCurrentWeek(){
+  const now=new Date();let hit=null;
+  PLAN.forEach(m=>m.weeks.forEach((w,i)=>{
+    const end=addDays(w.weekStart,7);
+    if(now>=w.weekStart&&now<end) hit={...w,index:i+1};
+  }));
+  return hit;
+}
+function findNextTask(){
+  const now=new Date();let nearest=null;
+  PLAN.forEach(m=>m.weeks.forEach(w=>w.tasks.forEach(t=>{
+    if(t.date>now){if(!nearest||t.date<nearest.date) nearest=t;}
+  })));
   return nearest;
 }
-function currentWeekBlock(){
-  const now = new Date();
-  let found = null;
-  DB.plan.forEach(month=>{
-    month.weeks.forEach(week=>{
-      const start = startOfDay(week.weekStart);
-      const end = addDays(start,7);
-      if(now >= start && now < end){ found = week; }
-    });
-  });
-  return found;
+function findNextWeek(currentWeek){
+  if(!currentWeek) return null;
+  let foundNext=null;
+  PLAN.forEach(m=>m.weeks.forEach((w,i)=>{
+    if(w.weekStart>currentWeek.weekStart && !foundNext) foundNext={...w,index:i+1};
+  }));
+  return foundNext;
 }
 
-/* === Marquage et manquements === */
-function markDone(taskId, person){
-  if(DB.done[taskId] || DB.missed[taskId]) return;
-  DB.done[taskId] = true;
-  if(person){
-    DB.stats.completed[person] = (DB.stats.completed[person]||0) + 1;
-    addPoints(person, 2);
-  }
-  STORE.save(DB);
-  renderAll();
-}
-
-function sweepMissed(){
-  const now = new Date();
-  const last = DB.meta.lastSweep ? new Date(DB.meta.lastSweep) : new Date(0);
-  DB.plan.forEach(month=>{
-    month.weeks.forEach(week=>{
-      week.tasks.forEach(t=>{
-        const dt = new Date(t.date);
-        if(dt < now && dt > last && !DB.done[t.id] && !DB.missed[t.id]){
-          DB.missed[t.id] = true;
-          if(t.person){
-            DB.stats.missed[t.person] = (DB.stats.missed[t.person]||0) + 1;
-            breakStreak(t.person);
-          }
-        }
-      });
-    });
-  });
-  DB.meta.lastSweep = now.toISOString();
-  STORE.save(DB);
-}
-
-/* === Demande de changement === */
-function requestChange(task, toPerson){
-  if(!toPerson || !PEOPLE.includes(toPerson)) return;
-  const prev = task.person;
-  DB.changes[task.id] = {from: prev || "Libre", to: toPerson};
-  task.person = toPerson;
-  STORE.save(DB);
-  renderAll();
-}
-
-/* === UI === */
+/* UI */
 function setActiveTab(tab){
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
   document.querySelectorAll(".tabs").forEach(s=>s.classList.remove("active"));
   document.getElementById(`tab-${tab}`).classList.add("active");
   document.getElementById(tab).classList.add("active");
 }
-
 function renderHome(){
-  const todayTxt = document.getElementById("todayText");
-  const now = new Date();
-  const days = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
-  todayTxt.textContent = `${days[now.getDay()]} ${fmtDate(now)} • ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-
-  const t = findCurrentTask();
-  const whoEl = document.getElementById("heroWho");
-  const taskEl = document.getElementById("heroTask");
-  const chipsEl = document.getElementById("heroChips");
-  chipsEl.innerHTML = "";
-  if(t){
-    const who = t.person || "Libre (tous)";
-    whoEl.textContent = `Responsable actuel: ${who}`;
-    taskEl.textContent = `Prochaine tâche: ${t.icon} ${t.label} — ${t.whenLabel} (${fmtDate(new Date(t.date))})`;
-    const weekChip = document.createElement("span"); weekChip.className="chip"; weekChip.textContent = `Semaine ${t.w}`;
-    const statusChip = document.createElement("span"); statusChip.className="chip"; statusChip.textContent = DB.done[t.id] ? "État: accompli" : "État: à faire";
-    chipsEl.appendChild(weekChip); chipsEl.appendChild(statusChip);
-  } else {
-    whoEl.textContent = "Responsable actuel: —";
-    taskEl.textContent = "Aucune tâche à proximité.";
+  const now=new Date();
+  document.getElementById("todayText").textContent=`Aujourd'hui : ${fmtDate(now)}`;
+  const cw=findCurrentWeek();
+  if(cw){
+    document.getElementById("weekInfo").textContent=`Semaine ${cw.index}`;
+    document.getElementById("heroWho").textContent=`Responsable: ${cw.responsible}`;
+  }
+  const nt=findNextTask();
+  if(nt){
+    document.getElementById("heroTask").textContent=`Prochaine tâche: ${nt.icon} ${nt.label} — ${nt.whenLabel} (${fmtDate(new Date(nt.date))}) • ${nt.who}`;
+  }
+  const nw=findNextWeek(cw);
+  if(nw){
+    document.getElementById("nextResp").textContent=`Prochaine semaine: ${nw.responsible}`;
   }
 }
-
-function renderActions(){
-  const btn = document.getElementById("bigActionBtn");
-  const currentWeek = currentWeekBlock();
-  const tasksBox = document.getElementById("currentWeekTasks");
-  tasksBox.innerHTML = "";
-  let doneCount = 0;
-
-  if(currentWeek){
-    currentWeek.tasks.forEach(t=>{
-      const row = document.createElement("div");
-      row.className = "task-row";
-      const left = document.createElement("div");
-      left.innerHTML = `<div class="name">${t.icon} ${t.label}</div><div class="when">${t.whenLabel} • ${fmtDate(new Date(t.date))} • ${t.person ? t.person : "Libre"}</div>`;
-      const right = document.createElement("div");
-      const bDone = document.createElement("button");
-      bDone.textContent = DB.done[t.id] ? "Accomplie" : "Valider";
-      bDone.className = DB.done[t.id] ? "done" : "";
-      bDone.addEventListener("click", ()=> markDone(t.id, t.person));
-      const bChange = document.createElement("button");
-      bChange.textContent = "Changer";
-      bChange.className = "change";
-      bChange.addEventListener("click", ()=>{
-        const to = prompt("Qui prend la tâche ? " + PEOPLE.join(", "));
-        if(to && PEOPLE.includes(to)){ requestChange(t, to); }
-      });
-      right.appendChild(bDone);
-      right.appendChild(bChange);
-      row.appendChild(left); row.appendChild(right);
-      tasksBox.appendChild(row);
-      if(DB.done[t.id]) doneCount++;
+function renderWeeks(){
+  if(FUTURE_MONTHS.length===0)return;
+  const names=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+  const current=FUTURE_MONTHS[currentMonthIndex];
+  document.getElementById("monthLabel").textContent=`${names[current.monthIdx]} ${current.year}`;
+  const cont=document.getElementById("weeksContainer");cont.innerHTML="";
+  current.weeks.forEach((w,i)=>{
+    const wrap=document.createElement("div");wrap.className="week"+(w.isLibre?" libre":"");
+    wrap.innerHTML=`<h3 class="${w.isLibre?"libre":""}">Semaine ${i+1} — ${w.responsible}</h3>`;
+    w.tasks.forEach(t=>{
+      const dd=fmtDate(new Date(t.date));
+      const row=document.createElement("div");row.className="task";
+      row.textContent=`${t.icon} ${t.label} (${t.whenLabel}) — ${dd}`;
+      wrap.appendChild(row);
     });
-  }
-
-  const nearest = currentWeek ? currentWeek.tasks.find(x=>!DB.done[x.id]) || currentWeek.tasks[0] : null;
-  if(nearest){
-    btn.textContent = DB.done[nearest.id] ? "Déjà accompli" : `Valider: ${nearest.icon} ${nearest.label} (${nearest.whenLabel})`;
-    btn.className = DB.done[nearest.id] ? "big-btn done" : "big-btn";
-    btn.onclick = ()=> markDone(nearest.id, nearest.person);
-  } else {
-    btn.textContent = "Rien à valider";
-    btn.className = "big-btn";
-    btn.onclick = null;
-  }
-
-  const prog = document.getElementById("weekProgress");
-  const legend = document.getElementById("weekLegend");
-  const total = currentWeek ? currentWeek.tasks.length : 4;
-  const pct = Math.round((doneCount/total)*100);
-  prog.style.width = pct+"%";
-  legend.textContent = `Progression de la semaine: ${doneCount}/${total}`;
-}
-
-function renderPlanning(){
-  const container = document.getElementById("planContainer");
-  container.innerHTML = "";
-  if(!DB.plan || DB.plan.length === 0){
-    container.innerHTML = "<p>Aucun planning. <button onclick='generateYearPlan()'>Générer maintenant</button></p>";
-    return;
-  }
-
-  DB.plan.forEach(month=>{
-    const monthName = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"][month.monthIdx];
-    const title = document.createElement("div");
-    title.className="month-title";
-    title.textContent = `${monthName} ${month.year}`;
-    container.appendChild(title);
-
-    month.weeks.forEach(week=>{
-      const wrap = document.createElement("div");
-      wrap.className="week";
-      const head = document.createElement("div");
-      head.className="week-head";
-      const who = week.assigned ? week.assigned : "Libre (tous)";
-      head.innerHTML = `<div><strong>Semaine ${week.w}</strong> • du ${fmtDate(week.weekStart)} au ${fmtDate(addDays(week.weekStart,6))}</div><div class="chip">${who}</div>`;
-      wrap.appendChild(head);
-
-      week.tasks.forEach(t=>{
-        const row = document.createElement("div");
-        row.className="task-row";
-        const left = document.createElement("div");
-        const changeInfo = DB.changes[t.id] ? ` • échangée: ${DB.changes[t.id].from} ➜ ${DB.changes[t.id].to}` : "";
-        left.innerHTML = `<div class="name">${t.icon} ${t.label}</div><div class="when">${t.whenLabel} • ${fmtDate(new Date(t.date))} • ${t.person ? t.person : "Libre"}${changeInfo}</div>`;
-        const right = document.createElement("div");
-        const b = document.createElement("button");
-        b.textContent = DB.done[t.id] ? "Accomplie" : "Marquer";
-        b.className = DB.done[t.id] ? "done" : "";
-        b.addEventListener("click", ()=> markDone(t.id, t.person));
-        const bAssign = document.createElement("button");
-        bAssign.textContent = "Changer";
-        bAssign.className = "assign";
-        bAssign.addEventListener("click", ()=>{
-          const to = prompt("Qui prend la tâche ? " + PEOPLE.join(", "));
-          if(to && PEOPLE.includes(to)){ requestChange(t, to); }
-        });
-        right.appendChild(b); right.appendChild(bAssign);
-        row.appendChild(left); row.appendChild(right);
-        wrap.appendChild(row);
-      });
-
-      container.appendChild(wrap);
-    });
+    cont.appendChild(wrap);
   });
 }
 
-function renderKPIs(){
-  const grid = document.getElementById("kpiGrid");
-  grid.innerHTML = "";
-  PEOPLE.forEach(name=>{
-    const done = (DB.stats.completed[name]||0);
-    const miss = (DB.stats.missed[name]||0);
-    const pts = (DB.stats.points[name]||0);
-    const kpi = document.createElement("div");
-    kpi.className="kpi";
-    kpi.innerHTML = `<h3>${name}</h3>
-      <div class="val">${done} ✓</div><div class="legend">Tâches accomplies</div>
-      <div style="margin-top:6px;color:${miss>=5?'#fecaca': 'var(--muted)'}">${miss} ✗ manquées</div>
-      <div style="margin-top:6px"><strong>Points:</strong> ${pts}</div>
-      <div style="margin-top:6px"><strong>Série:</strong> ${DB.stats.streak[name]||0}</div>`;
-    grid.appendChild(kpi);
-  });
-}
-
-function renderAll(){
-  renderHome();
-  renderActions();
-  renderPlanning();
-  renderKPIs();
-}
-
+/* Init */
 function init(){
-  if(!DB.meta.generatedAt){ generateYearPlan(); }
-  sweepMissed();
-  document.getElementById("tab-home").onclick = ()=> setActiveTab("home");
-  document.getElementById("tab-actions").onclick = ()=> setActiveTab("actions");
-  document.getElementById("tab-planning").onclick = ()=> setActiveTab("planning");
-  document.getElementById("tab-kpis").onclick = ()=> setActiveTab("kpis");
-  document.getElementById("regeneratePlanBtn").onclick = ()=> {
-    if(confirm("Cela écrasera le planning actuel. Continuer ?")){ generateYearPlan(); }
-  };
-  renderAll();
+  generateYearPlan();renderHome();renderWeeks();
+  document.getElementById("tab-home").onclick=()=>setActiveTab("home");
+  document.getElementById("tab-planning").onclick=()=>setActiveTab("planning");
+  document.getElementById("prevMonth").onclick=()=>{if(currentMonthIndex>0){currentMonthIndex--;renderWeeks();}};
+  document.getElementById("nextMonth").onclick=()=>{if(currentMonthIndex<FUTURE_MONTHS.length-1){currentMonthIndex++;renderWeeks();}};
 }
-
-init();
-setInterval(()=>{ renderHome(); }, 60*1000);
+init();setInterval(()=>{renderHome();},60000);
 </script>
 </body>
 </html>
