@@ -1,23 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <!-- =========================================================
-       Poubelles Copro — Version A : Pop-up AFFICHÉ TOUS LES JOURS
-       - Pop-up quotidien systématique au chargement
-       - Message contextualisé (tâche du jour ou "aucune tâche")
-       - Verrou "déjà vu aujourd'hui" via localStorage
-       - Boutons pour forcer l'ouverture / fermer et "ne plus montrer"
-       - Corrections iOS Safari (aucune dépendance aux Notifications)
-       ========================================================= -->
   <meta charset="utf-8" />
-  <title>Poubelles Copro — Version A (Pop-up quotidien)</title>
+  <title>Poubelles Copro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <style>
-    /* =========================
-       THEME / DESIGN SYSTEM
-       ========================= */
     :root{
       --bg1:#3ea76a; --bg2:#a7f3d0; /* vert poubelle clair */
       --card:#0b1225; --text:#f8fafc; --muted:#cbd5e1;
@@ -25,74 +12,48 @@
       --ok:#22c55e; --warn:#f59e0b; --danger:#ef4444;
       /* Couleurs par responsable */
       --sofienn:#22c55e; --vanessa:#3b82f6; --anthony:#f59e0b; --marc:#8b5cf6; --libre:#64748b;
-      --shadow: 0 10px 30px rgba(0,0,0,.25);
-      --shadow-soft: 0 6px 18px rgba(0,0,0,.18);
-      --radius:14px;
     }
     *{box-sizing:border-box}
     html,body{
       margin:0;padding:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       background:linear-gradient(135deg,var(--bg1),var(--bg2));
-      color:var(--text);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      text-rendering:optimizeLegibility;
+      color:var(--text)
     }
-    img{max-width:100%;display:block}
-    button{font:inherit}
-
-    /* =========================
-       HEADER / NAV
-       ========================= */
     header{
       position:sticky;top:0;z-index:50;
       background:linear-gradient(90deg,#22c55e,#84cc16);
       padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.2);
       display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap
     }
-    .brand{display:flex;align-items:center;gap:10px;flex:1;min-width:200px}
+    .brand{display:flex;align-items:center;gap:10px;flex:1}
     .logo{width:32px;height:32px;border-radius:10px;background:conic-gradient(#22c55e,#f59e0b,#06b6d4,#84cc16)}
-    .brand h1{margin:0;font-size:16px;white-space:nowrap}
+    .brand h1{margin:0;font-size:16px}
     nav{display:flex;gap:8px;margin-top:6px}
     nav button{
       flex:1;padding:8px;border:1px solid rgba(255,255,255,.2);
       border-radius:10px;background:rgba(0,0,0,.25);color:var(--text);
       font-weight:600;font-size:14px;transition:all .2s;cursor:pointer;
-      box-shadow: var(--shadow-soft);
-      -webkit-tap-highlight-color: transparent;
     }
     nav button.active{border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.5) inset}
     .actions{display:flex;gap:8px;flex-wrap:wrap}
     .btn{
       padding:8px 10px;border:1px solid rgba(255,255,255,.2);
       border-radius:10px;background:#0b1225;color:var(--text);cursor:pointer;font-weight:600;
-      box-shadow: var(--shadow-soft);
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
     }
     .btn.secondary{background:#0f172a}
     .btn.success{background:#14532d}
     .btn.warn{background:#7c2d12}
-    .btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,.35)}
-    .btn:active{transform:translateY(1px)}
-
-    /* =========================
-       LAYOUT
-       ========================= */
     main{padding:12px}
     .card{
       background:rgba(11,18,37,.85);
       backdrop-filter:blur(6px);
       border:1px solid var(--ring);
-      border-radius:var(--radius);
-      padding:14px;margin-bottom:14px;
-      box-shadow: var(--shadow);
+      border-radius:14px;
+      padding:14px;margin-bottom:14px
     }
 
-    /* =========================
-       HOME / HERO SUMMARY
-       ========================= */
+    /* Accueil */
     .hero-center{text-align:center;padding:20px}
     .hero-center h2{margin:6px 0;font-size:20px}
     .hero-center .date{font-size:14px;color:#d1d5db;margin-bottom:8px}
@@ -102,13 +63,13 @@
       padding:2px 8px;border-radius:999px;border:1px solid rgba(255,255,255,.2);margin-left:6px;font-size:.9rem
     }
     .hero-center .nextTask, .hero-center .nextWeek{font-size:14px;color:#d1d5db;margin-top:6px}
-    .countdown{margin-top:10px;font-weight:700;font-size:18px}
+    .countdown{
+      margin-top:10px;font-weight:700;font-size:18px
+    }
     .progress-wrap{margin-top:10px;background:#0f172a;border-radius:999px;height:10px;overflow:hidden;border:1px solid var(--ring)}
     .progress{height:100%;width:0%}
 
-    /* =========================
-       PLANNING / WEEKS
-       ========================= */
+    /* Planning */
     .month-bar{
       display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap
     }
@@ -118,8 +79,7 @@
     }
     .month-nav button{
       background:#0f172a;border:none;color:#fff;cursor:pointer;
-      border-radius:8px;padding:4px 8px;font-size:15px;
-      box-shadow: var(--shadow-soft);
+      border-radius:8px;padding:4px 8px;font-size:15px
     }
     .week{
       background:#1e293b;border:1px solid var(--ring);
@@ -146,59 +106,35 @@
       display:flex;gap:6px;align-items:center;background:#0b1225;border:1px solid var(--ring);border-radius:999px;padding:4px 8px;font-size:12px
     }
 
-    /* =========================
-       MODALS
-       ========================= */
-    .modal{
-      position:fixed;inset:0;background:rgba(0,0,0,.45);
-      display:none;align-items:center;justify-content:center;z-index:60;
-      transition: opacity .2s ease;
-    }
-    .modal[aria-hidden="true"]{opacity:0}
-    .modal.open{display:flex;opacity:1}
-    .modal .box{
-      background:#0b1225;border:1px solid var(--ring);border-radius:14px;max-width:720px;width:92%;padding:16px;
-      text-align:left;box-shadow: var(--shadow);
-    }
+    /* Modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:60}
+    .modal.open{display:flex}
+    .modal .box{background:#0b1225;border:1px solid var(--ring);border-radius:14px;max-width:680px;width:90%;padding:16px;text-align:center}
     .modal .box h3{margin:0 0 8px 0}
-    .modal .box p{margin:.25rem 0;color:#e5e7eb}
-    .modal .box .close{
-      margin-top:12px;cursor:pointer;border:none;background:#0f172a;color:#fff;border-radius:8px;padding:10px 14px;font-weight:700
-    }
-    .modal .box footer{
-      display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px
-    }
+    .modal .box .close{margin-top:12px;cursor:pointer;border:none;background:#0f172a;color:#fff;border-radius:8px;padding:6px 12px}
 
     .footer{padding:10px;color:#e2e8f0;font-size:11px;text-align:center}
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   </style>
 </head>
 <body>
-  <!-- =========================================================
-       HEADER
-       ========================================================= -->
   <header>
-    <div class="brand" role="banner" aria-label="Application Poubelles Copro">
-      <div class="logo" aria-hidden="true"></div>
+    <div class="brand">
+      <div class="logo"></div>
       <h1>🚮 Poubelles Copro</h1>
     </div>
-    <nav role="tablist" aria-label="Navigation principale">
-      <button id="tab-home" class="active" role="tab" aria-selected="true" aria-controls="home">Accueil</button>
-      <button id="tab-planning" role="tab" aria-selected="false" aria-controls="planning">Planning</button>
+    <nav>
+      <button id="tab-home" class="active">Accueil</button>
+      <button id="tab-planning">Planning</button>
     </nav>
     <div class="actions">
-      <button id="notifyToggle" class="btn secondary" type="button">🔔 Activer rappels</button>
-      <button id="openRules" class="btn" type="button" aria-haspopup="dialog" aria-controls="rulesModal">ℹ️ Règles</button>
-      <button id="forceDailyPopup" class="btn ghost" type="button" title="Forcer le pop-up (test)">⚙️ Tester le pop-up</button>
+      <button id="notifyToggle" class="btn secondary">🔔 Activer rappels</button>
+      <button id="openRules" class="btn">ℹ️ Règles</button>
     </div>
   </header>
 
-  <!-- =========================================================
-       MAIN
-       ========================================================= -->
   <main>
     <!-- Accueil -->
-    <section id="home" class="tabs active" role="tabpanel" aria-labelledby="tab-home">
+    <section id="home" class="tabs active">
       <div class="card hero-center">
         <div class="date" id="todayText">—</div>
         <div class="week" id="weekInfo">—</div>
@@ -206,7 +142,7 @@
 
         <div class="countdown" id="countdown">—</div>
         <div class="progress-wrap" aria-label="Progression de la semaine">
-          <div id="weekProgress" class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
+          <div id="weekProgress" class="progress"></div>
         </div>
 
         <div class="nextTask" id="heroTask">Prochaine tâche: —</div>
@@ -215,20 +151,20 @@
     </section>
 
     <!-- Planning -->
-    <section id="planning" class="tabs" role="tabpanel" aria-labelledby="tab-planning" hidden>
+    <section id="planning" class="tabs">
       <div class="card">
         <div class="month-bar">
-          <div class="month-nav" aria-label="Navigation mois">
-            <button id="prevMonth" type="button" aria-label="Mois précédent">◀️</button>
-            <span id="monthLabel" aria-live="polite">—</span>
-            <button id="nextMonth" type="button" aria-label="Mois suivant">▶️</button>
+          <div class="month-nav">
+            <button id="prevMonth">◀️</button>
+            <span id="monthLabel">—</span>
+            <button id="nextMonth">▶️</button>
           </div>
           <div class="actions">
-            <button id="exportWeek" class="btn success" type="button">📅 Exporter semaine</button>
-            <button id="exportMonth" class="btn success" type="button">📅 Exporter mois</button>
+            <button id="exportWeek" class="btn success">📅 Exporter semaine</button>
+            <button id="exportMonth" class="btn success">📅 Exporter mois</button>
           </div>
         </div>
-        <div id="legend" class="legend" aria-label="Légende des couleurs"></div>
+        <div id="legend" class="legend"></div>
         <div id="weeksContainer"></div>
       </div>
     </section>
@@ -236,42 +172,30 @@
 
   <div class="footer">Règle: 1er lundi → Sofienn, puis Vanessa, Anthony, Marc. 5e semaine = LIBRE.</div>
 
-  <!-- =========================================================
-       Modal PopUp quotidien (toujours affiché)
-       ========================================================= -->
-  <div id="dailyPopup" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="dailyPopupTitle" aria-describedby="dailyPopupDesc">
+  <!-- Modal PopUp quotidien -->
+  <div id="dailyPopup" class="modal" aria-hidden="true">
     <div class="box">
-      <h3 id="dailyPopupTitle">Rappel du jour</h3>
-      <p id="dailyPopupDesc">Message</p>
-      <div id="dailyPopupExtra" style="font-size:13px;color:#cbd5e1"></div>
-      <footer>
-        <button id="dailyPopupDismissToday" class="btn secondary" type="button" title="Ne plus afficher aujourd’hui">🙈 Ne plus afficher aujourd’hui</button>
-        <button class="close" id="dailyPopupClose" type="button">OK</button>
-      </footer>
+      <h3 id="popupMessage">Message</h3>
+      <button class="close" onclick="closePopup()">OK</button>
     </div>
   </div>
 
-  <!-- =========================================================
-       Modal Règles
-       ========================================================= -->
-  <div id="rulesModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+  <!-- Modal Règles -->
+  <div id="rulesModal" class="modal" aria-hidden="true">
     <div class="box">
-      <button class="close" id="closeRules" type="button" aria-label="Fermer la fenêtre des règles">Fermer</button>
-      <h3 id="rulesTitle">Règles de la copro — gestion des poubelles</h3>
+      <button class="close" id="closeRules">Fermer</button>
+      <h3>Règles de la copro — gestion des poubelles</h3>
       <ul>
         <li>Le responsable de la semaine est défini par l’ordre : <b>Sofienn → Vanessa → Anthony → Marc</b>, à partir du <b>1er lundi</b> du mois.</li>
         <li>La <b>5e semaine</b> (si elle existe) est <b>LIBRE</b> : chacun reste vigilant.</li>
         <li>Tâches : <b>Sortie</b> mardi & vendredi 18h, <b>Rentrée</b> mercredi & samedi 8h.</li>
         <li>En cas d’empêchement, essayez d’échanger en direct (sans passer par l’appli).</li>
       </ul>
-      <p style="color:#cbd5e1;font-size:14px">Un cadenas sera ajouté en cas de manquement à vos obligations</p>
+      <p style="color:#cbd5e1;font-size:14px">Un cadenas sera ajouté en cas de manquement à vos obligations </p>
     </div>
   </div>
-
 <script>
-/* ============================================================
-   Données & Constantes
-   ============================================================ */
+/* === Données === */
 const PEOPLE=["Sofienn","Vanessa","Anthony","Marc"];
 const PERSON_COLORS={
   "Sofienn":"var(--sofienn)",
@@ -287,13 +211,7 @@ const TASKS=[
   {icon:"🏠",label:"Rentrée",whenLabel:"Samedi matin",dow:6,time:"08:00"},
 ];
 
-// clefs localStorage
-const LS_KEY_POPUP_SEEN = "pc_popup_seen_date_vA"; // stocke YYYY-MM-DD
-const LS_KEY_NOTIF_ENABLED = "pc_notif_enabled";
-
-/* ============================================================
-   Helpers date/heure
-   ============================================================ */
+/* Helpers */
 function pad(n){return n<10?"0"+n:n;}
 function fmtDate(d){return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;}
 function fmtTime(d){return `${pad(d.getHours())}:${pad(d.getMinutes())}`;}
@@ -304,11 +222,8 @@ function setTime(d,hhmm){const x=new Date(d);const [hh,mm]=hhmm.split(":").map(N
 function firstMondayOfMonth(y,m){const d=new Date(y,m,1);const day=d.getDay();const off=(day===0)?1:(day===1?0:(8-day)%7);d.setDate(d.getDate()+off);return startOfDay(d);}
 function weekRange(ws){const we=addDays(ws,6);return `${fmtDate(ws)} → ${fmtDate(we)}`;}
 function isSameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
-function isoDate(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
 
-/* ============================================================
-   Planning generation
-   ============================================================ */
+/* Planning */
 let PLAN=[], FUTURE_MONTHS=[], currentMonthIndex=0;
 function buildMonth(year,monthIdx){
   const firstMon=firstMondayOfMonth(year,monthIdx);
@@ -334,15 +249,10 @@ function generateYearPlan(){
     plan.push(buildMonth(y,m));
   }
   PLAN=plan;
-  FUTURE_MONTHS=PLAN.filter(m=>{
-    const nm=new Date();
-    return (m.year>nm.getFullYear())||(m.year===nm.getFullYear()&&m.monthIdx>=nm.getMonth());
-  });
+  FUTURE_MONTHS=PLAN.filter(m=>{const nm=new Date();return (m.year>nm.getFullYear())||(m.year===nm.getFullYear()&&m.monthIdx>=nm.getMonth());});
 }
 
-/* ============================================================
-   Recherche de tâches/semaine
-   ============================================================ */
+/* Trouver semaine actuelle et prochaine tâche */
 function findCurrentWeek(){
   const now=new Date();let hit=null;
   PLAN.forEach(m=>m.weeks.forEach((w,i)=>{
@@ -367,28 +277,15 @@ function findNextWeek(currentWeek){
   return foundNext;
 }
 
-/* ============================================================
-   UI helpers
-   ============================================================ */
+/* UI */
 function setActiveTab(tab){
   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-  document.querySelectorAll(".tabs").forEach(s=>{
-    s.classList.remove("active");
-    s.hidden = true;
-  });
+  document.querySelectorAll(".tabs").forEach(s=>s.classList.remove("active"));
   document.getElementById(`tab-${tab}`).classList.add("active");
-  const el = document.getElementById(tab);
-  el.classList.add("active");
-  el.hidden = false;
-  // ARIA:
-  document.getElementById("tab-home").setAttribute("aria-selected", tab==="home" ? "true" : "false");
-  document.getElementById("tab-planning").setAttribute("aria-selected", tab==="planning" ? "true" : "false");
+  document.getElementById(tab).classList.add("active");
 }
 function colorFor(person){return PERSON_COLORS[person]||"var(--libre)";}
 
-/* ============================================================
-   Rendu HOME
-   ============================================================ */
 function renderHome(){
   const now=new Date();
   document.getElementById("todayText").textContent=`Aujourd'hui : ${fmtDate(now)} (${["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"][now.getDay()]})`;
@@ -397,9 +294,6 @@ function renderHome(){
     document.getElementById("weekInfo").textContent=`Semaine ${cw.index}`;
     const tag=`<span class="tag" style="border-color:${colorFor(cw.responsible)};color:${colorFor(cw.responsible)}">${cw.responsible}</span>`;
     document.getElementById("heroWho").innerHTML=`Responsable: ${tag}`;
-  } else {
-    document.getElementById("weekInfo").textContent=`Semaine —`;
-    document.getElementById("heroWho").textContent=`Responsable: —`;
   }
   const nt=findNextTask();
   if(nt){
@@ -407,13 +301,10 @@ function renderHome(){
     updateCountdown(nt.date);
   } else {
     document.getElementById("countdown").textContent="Aucune tâche à venir.";
-    document.getElementById("heroTask").textContent="Prochaine tâche: —";
   }
   const nw=findNextWeek(cw);
   if(nw){
     document.getElementById("nextResp").textContent=`Prochaine semaine: ${nw.responsible}`;
-  } else {
-    document.getElementById("nextResp").textContent=`Prochaine semaine: —`;
   }
   updateWeekProgress();
 }
@@ -426,7 +317,6 @@ function updateWeekProgress(){
   const bar=document.getElementById("weekProgress");
   bar.style.width = (ratio*100).toFixed(1)+"%";
   bar.style.background = `linear-gradient(90deg, var(--ok), var(--warn), var(--danger))`;
-  bar.setAttribute("aria-valuenow", (ratio*100).toFixed(0));
 }
 let countdownTimer=null;
 function updateCountdown(target){
@@ -447,10 +337,6 @@ function updateCountdown(target){
   tick();
   countdownTimer=setInterval(tick,1000);
 }
-
-/* ============================================================
-   Rendu PLANNING
-   ============================================================ */
 function renderLegend(){
   const el=document.getElementById("legend");
   el.innerHTML="";
@@ -469,7 +355,6 @@ function renderWeeks(){
   FUTURE_MONTHS.forEach(m => allWeeks.push(...m.weeks));
   allWeeks = allWeeks.filter(w => addDays(w.weekStart,7) >= today);
   const next6 = allWeeks.slice(0,6);
-  document.getElementById("monthLabel").textContent = `Prochaines semaines (${next6.length})`;
   next6.forEach((w,i)=>{
     const wrap=document.createElement("div");
     wrap.className="week"+(w.isLibre?" libre":"");
@@ -501,15 +386,10 @@ function renderWeeks(){
   });
 }
 
-/* ============================================================
-   Notifications (NATIVES *désactivées* par défaut sur iOS)
-   ============================================================ */
+/* == Notifications locales == */
 let notificationsEnabled = false;
 function requestNotificationPermission(){
-  if(!("Notification" in window)){
-    alert("Notifications non supportées par ce navigateur.");
-    return false;
-  }
+  if(!("Notification" in window)) return alert("Notifications non supportées par ce navigateur.");
   if(Notification.permission==="granted"){notificationsEnabled=true;return true;}
   if(Notification.permission!=="denied"){
     return Notification.requestPermission().then(p=>{
@@ -518,13 +398,11 @@ function requestNotificationPermission(){
       return notificationsEnabled;
     });
   }
-  return false;
 }
 function updateNotifyButton(){
   const btn=document.getElementById("notifyToggle");
   btn.textContent = notificationsEnabled ? "🔕 Désactiver rappels" : "🔔 Activer rappels";
   btn.classList.toggle("warn", notificationsEnabled);
-  try{ localStorage.setItem(LS_KEY_NOTIF_ENABLED, notificationsEnabled ? "1" : "0"); }catch(_){}
 }
 function scheduleNotifications(){
   if(!notificationsEnabled) return;
@@ -534,23 +412,17 @@ function scheduleNotifications(){
     const d=new Date(t.date);
     if(d>now && d-now <= 7*24*3600*1000){ soon.push({t,when:d}); }
   })));
-  // ⚠️ iOS Safari : setTimeout > 2147483647 clampé
   soon.forEach(({t,when})=>{
     const ms = when - new Date();
     setTimeout(()=>{
-      if(!notificationsEnabled) return;
-      try{
+      if(notificationsEnabled){
         new Notification(`${t.icon} ${t.label}`, { body:`${t.whenLabel} • ${fmtDate(when)} ${fmtTime(when)} • ${t.who}` });
-      }catch(e){
-        // fallback silencieux
       }
     }, Math.max(0, Math.min(ms, 2147483647)));
   });
 }
 
-/* ============================================================
-   Export ICS
-   ============================================================ */
+/* == Export ICS == */
 function toICSDate(dt){
   const y=dt.getFullYear();
   const mo=pad(dt.getMonth()+1);
@@ -558,7 +430,6 @@ function toICSDate(dt){
   const h=pad(dt.getHours());
   const mi=pad(dt.getMinutes());
   const s=pad(dt.getSeconds());
-  // sans Z pour laisser le calendrier interpréter en localtime
   return `${y}${mo}${da}T${h}${mi}${s}`;
 }
 function generateICS(events, filename="poubelles.ics"){
@@ -607,120 +478,45 @@ function collectMonthEvents(month){
   return ev;
 }
 
-/* ============================================================
-   Modales (règles)
-   ============================================================ */
-function openRules(){
-  const m=document.getElementById("rulesModal");
-  m.classList.add("open");
-  m.setAttribute("aria-hidden","false");
-}
-function closeRules(){
-  const m=document.getElementById("rulesModal");
-  m.classList.remove("open");
-  m.setAttribute("aria-hidden","true");
-}
+/* == Modales == */
+function openRules(){document.getElementById("rulesModal").classList.add("open");document.getElementById("rulesModal").setAttribute("aria-hidden","false");}
+function closeRules(){document.getElementById("rulesModal").classList.remove("open");document.getElementById("rulesModal").setAttribute("aria-hidden","true");}
 
-/* ============================================================
-   Pop-up QUOTIDIEN (tous les jours)
-   ============================================================ */
-function openDailyPopup(message, extraHtml=""){
-  const modal=document.getElementById("dailyPopup");
-  const title=document.getElementById("dailyPopupTitle");
-  const desc=document.getElementById("dailyPopupDesc");
-  const extra=document.getElementById("dailyPopupExtra");
-  title.textContent="Rappel du jour";
-  desc.textContent=message;
-  extra.innerHTML=extraHtml||"";
-  modal.classList.add("open");
-  modal.setAttribute("aria-hidden","false");
+/* == PopUp quotidien == */
+function showPopup(message){
+  document.getElementById("popupMessage").innerText=message;
+  document.getElementById("dailyPopup").classList.add("open");
 }
-function closeDailyPopup(){
-  const modal=document.getElementById("dailyPopup");
-  modal.classList.remove("open");
-  modal.setAttribute("aria-hidden","true");
-}
-function markPopupSeenToday(){
-  try{ localStorage.setItem(LS_KEY_POPUP_SEEN, isoDate(new Date())); }catch(_){}
-}
-function alreadySeenToday(){
-  try{
-    const v=localStorage.getItem(LS_KEY_POPUP_SEEN);
-    return v===isoDate(new Date());
-  }catch(_){ return false; }
-}
-
-/**
- * showDailyPopup() : S'EXÉCUTE TOUS LES JOURS
- * - montre un message contextuel : tâche du jour si elle existe, sinon "aucune tâche"
- * - affiche aussi la prochaine tâche à venir
- * - une fois par jour (sauf si bouton "Tester le pop-up")
- */
-function showDailyPopup(force=false){
-  if(!force && alreadySeenToday()) return;
-  const today=new Date();
-  const cw=findCurrentWeek();
-  let message="Aucune tâche prévue aujourd’hui.";
-  let extra="";
-
-  let taskToday=null;
-  if(cw){
-    taskToday=cw.tasks.find(t=>isSameDay(t.date,today));
-  }
+function closePopup(){document.getElementById("dailyPopup").classList.remove("open");}
+function checkDailyPopup(){
+  const today=new Date();const cw=findCurrentWeek();if(!cw) return;
+  const taskToday=cw.tasks.find(t=>isSameDay(t.date,today));
   if(taskToday){
-    if(cw.responsible==="LIBRE"){
-      message=`🚨 Aujourd'hui c'est ${taskToday.label} (${taskToday.whenLabel}) ! Pas de responsable désigné, mais quelqu'un doit s'y coller 🤷‍♂️`;
-    } else {
-      message=`${taskToday.icon} ${cw.responsible}, c'est ton tour ! (${taskToday.label} — ${taskToday.whenLabel}) 💪`;
-    }
+    let msg="";
+    if(cw.responsible==="LIBRE"){msg=`🚨 Aujourd'hui c'est ${taskToday.label} (${taskToday.whenLabel}) ! Pas de responsable désigné, mais quelqu'un doit s'y coller 🤷‍♂️`; }
+    else{msg=`${taskToday.icon} ${cw.responsible}, c'est ton tour ! (${taskToday.label} — ${taskToday.whenLabel}) 💪`;}
+    showPopup(msg);
   }
-
-  const nt=findNextTask();
-  if(nt){
-    const nd=new Date(nt.date);
-    extra = `
-      <div>
-        <strong>Prochaine tâche :</strong> ${nt.icon} ${nt.label} — ${nt.whenLabel}
-        <br>${fmtDate(nd)} • ${fmtTime(nd)} • <span style="color:${colorFor(nt.who)}">${nt.who}</span>
-      </div>
-    `;
-  } else {
-    extra = `<div><em>Aucune tâche future trouvée.</em></div>`;
-  }
-
-  openDailyPopup(message, extra);
-  markPopupSeenToday();
 }
 
-/* ============================================================
-   Init
-   ============================================================ */
+/* == Init == */
 function init(){
   generateYearPlan();
   renderHome(); renderLegend(); renderWeeks();
-
-  // NAV
-  document.getElementById("tab-home").addEventListener("click",()=>setActiveTab("home"),{passive:true});
-  document.getElementById("tab-planning").addEventListener("click",()=>setActiveTab("planning"),{passive:true});
-
-  // MOIS NAV — (ici on montre "Prochaines semaines", on garde boutons pour compat)
-  document.getElementById("prevMonth").addEventListener("click",()=>{ if(currentMonthIndex>0){currentMonthIndex--; renderWeeks();}},{passive:true});
-  document.getElementById("nextMonth").addEventListener("click",()=>{ if(currentMonthIndex<FUTURE_MONTHS.length-1){currentMonthIndex++; renderWeeks();}},{passive:true});
-
-  // EXPORTS
-  document.getElementById("exportWeek").addEventListener("click",()=>{
+  document.getElementById("tab-home").onclick=()=>setActiveTab("home");
+  document.getElementById("tab-planning").onclick=()=>setActiveTab("planning");
+  document.getElementById("prevMonth").onclick=()=>{if(currentMonthIndex>0){currentMonthIndex--;renderWeeks();}};
+  document.getElementById("nextMonth").onclick=()=>{if(currentMonthIndex<FUTURE_MONTHS.length-1){currentMonthIndex++;renderWeeks();}};
+  document.getElementById("exportWeek").onclick=()=>{
     const cw=findCurrentWeek();
     if(!cw) return alert("Semaine courante introuvable.");
     generateICS(collectWeekEvents(cw), `poubelles-semaine-${fmtDate(cw.weekStart).replaceAll('/','')}.ics`);
-  });
-  document.getElementById("exportMonth").addEventListener("click",()=>{
-    const m=FUTURE_MONTHS[currentMonthIndex] || FUTURE_MONTHS[0];
-    if(!m) return alert("Aucun mois à exporter.");
+  };
+  document.getElementById("exportMonth").onclick=()=>{
+    const m=FUTURE_MONTHS[currentMonthIndex];
     generateICS(collectMonthEvents(m), `poubelles-${(m.monthIdx+1).toString().padStart(2,'0')}-${m.year}.ics`);
-  });
-
-  // NOTIFS
-  document.getElementById("notifyToggle").addEventListener("click", async ()=>{
+  };
+  document.getElementById("notifyToggle").onclick=async ()=>{
     if(!notificationsEnabled){
       await requestNotificationPermission();
       if(notificationsEnabled){ scheduleNotifications(); }
@@ -728,36 +524,15 @@ function init(){
       notificationsEnabled=false;
     }
     updateNotifyButton();
-  });
-  try{
-    notificationsEnabled = localStorage.getItem(LS_KEY_NOTIF_ENABLED) === "1";
-    updateNotifyButton();
-  }catch(_){}
-
-  // RÈGLES
-  document.getElementById("openRules").addEventListener("click",openRules);
-  document.getElementById("closeRules").addEventListener("click",closeRules);
-
-  // POP-UP QUOTIDIEN (toujours)
-  document.getElementById("dailyPopupClose").addEventListener("click", closeDailyPopup);
-  document.getElementById("dailyPopupDismissToday").addEventListener("click", ()=>{
-    markPopupSeenToday();
-    closeDailyPopup();
-  });
-
-  // Bouton force (tests)
-  document.getElementById("forceDailyPopup").addEventListener("click", ()=> showDailyPopup(true));
-
-  // Refresh UI
+  };
+  updateNotifyButton();
+  scheduleNotifications();
+  document.getElementById("openRules").onclick=openRules;
+  document.getElementById("closeRules").onclick=closeRules;
   setInterval(()=>{ renderHome(); }, 60_000);
-
-  // ✅ PopUp automatique au démarrage (tous les jours)
-  // On laisse un petit rafraîchissement pour s'assurer que le layout est prêt
-  requestAnimationFrame(()=> showDailyPopup(false));
+  checkDailyPopup(); // ✅ PopUp automatique au démarrage
 }
-
-// iOS/Safari: DOMContentLoaded est plus fiable que onload pour nos besoins
-document.addEventListener("DOMContentLoaded", init);
+init();
 </script>
 </body>
 </html>
