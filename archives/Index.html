@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Poubelles Copro</title>
+  <title>Poubelles Copro — améliorée</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
   <style>
     :root{
@@ -109,11 +109,12 @@
     /* Modal */
     .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:60}
     .modal.open{display:flex}
-    .modal .box{background:#0b1225;border:1px solid var(--ring);border-radius:14px;max-width:680px;width:90%;padding:16px;text-align:center}
+    .modal .box{background:#0b1225;border:1px solid var(--ring);border-radius:14px;max-width:680px;width:90%;padding:16px}
     .modal .box h3{margin:0 0 8px 0}
-    .modal .box .close{margin-top:12px;cursor:pointer;border:none;background:#0f172a;color:#fff;border-radius:8px;padding:6px 12px}
+    .modal .box .close{float:right;cursor:pointer;border:none;background:#0f172a;color:#fff;border-radius:8px;padding:6px 10px}
 
     .footer{padding:10px;color:#e2e8f0;font-size:11px;text-align:center}
+    /* (Pas d'amélioration responsive supplémentaire) */
   </style>
 </head>
 <body>
@@ -172,14 +173,6 @@
 
   <div class="footer">Règle: 1er lundi → Sofienn, puis Vanessa, Anthony, Marc. 5e semaine = LIBRE.</div>
 
-  <!-- Modal PopUp quotidien -->
-  <div id="dailyPopup" class="modal" aria-hidden="true">
-    <div class="box">
-      <h3 id="popupMessage">Message</h3>
-      <button class="close" onclick="closePopup()">OK</button>
-    </div>
-  </div>
-
   <!-- Modal Règles -->
   <div id="rulesModal" class="modal" aria-hidden="true">
     <div class="box">
@@ -194,6 +187,7 @@
       <p style="color:#cbd5e1;font-size:14px">Un cadenas sera ajouté en cas de manquement à vos obligations </p>
     </div>
   </div>
+
 <script>
 /* === Données === */
 const PEOPLE=["Sofienn","Vanessa","Anthony","Marc"];
@@ -249,7 +243,10 @@ function generateYearPlan(){
     plan.push(buildMonth(y,m));
   }
   PLAN=plan;
-  FUTURE_MONTHS=PLAN.filter(m=>{const nm=new Date();return (m.year>nm.getFullYear())||(m.year===nm.getFullYear()&&m.monthIdx>=nm.getMonth());});
+  FUTURE_MONTHS=PLAN.filter(m=>{
+    const nm=new Date();
+    return (m.year>nm.getFullYear())||(m.year===nm.getFullYear()&&m.monthIdx>=nm.getMonth());
+  });
 }
 
 /* Trouver semaine actuelle et prochaine tâche */
@@ -284,6 +281,7 @@ function setActiveTab(tab){
   document.getElementById(`tab-${tab}`).classList.add("active");
   document.getElementById(tab).classList.add("active");
 }
+
 function colorFor(person){return PERSON_COLORS[person]||"var(--libre)";}
 
 function renderHome(){
@@ -308,9 +306,10 @@ function renderHome(){
   }
   updateWeekProgress();
 }
+
 function updateWeekProgress(){
   const now=new Date();
-  const monday=addDays(startOfDay(now), (1 - (now.getDay()||7)));
+  const monday=addDays(startOfDay(now), (1 - (now.getDay()||7))); // lundi de cette semaine
   const total=7*24*60*60*1000;
   const elapsed=now - monday;
   let ratio=Math.max(0, Math.min(1, elapsed/total));
@@ -318,6 +317,7 @@ function updateWeekProgress(){
   bar.style.width = (ratio*100).toFixed(1)+"%";
   bar.style.background = `linear-gradient(90deg, var(--ok), var(--warn), var(--danger))`;
 }
+
 let countdownTimer=null;
 function updateCountdown(target){
   clearInterval(countdownTimer);
@@ -337,6 +337,7 @@ function updateCountdown(target){
   tick();
   countdownTimer=setInterval(tick,1000);
 }
+
 function renderLegend(){
   const el=document.getElementById("legend");
   el.innerHTML="";
@@ -347,23 +348,33 @@ function renderLegend(){
     el.appendChild(pill);
   });
 }
+
 function renderWeeks(){
   const cont=document.getElementById("weeksContainer");
   cont.innerHTML="";
   const today=new Date();
+
+  // On récupère toutes les semaines du plan (mois futurs inclus)
   let allWeeks = [];
   FUTURE_MONTHS.forEach(m => allWeeks.push(...m.weeks));
+
+  // On garde uniquement les semaines pas encore terminées
   allWeeks = allWeeks.filter(w => addDays(w.weekStart,7) >= today);
+
+  // On prend seulement la semaine actuelle + 5 suivantes (max 6 semaines)
   const next6 = allWeeks.slice(0,6);
+
   next6.forEach((w,i)=>{
     const wrap=document.createElement("div");
     wrap.className="week"+(w.isLibre?" libre":"");
     const range=weekRange(w.weekStart);
     const tagColor=colorFor(w.responsible);
+
     wrap.innerHTML=`<h3>
       <span>Semaine ${i+1} — <span class="tag" style="border-color:${tagColor};color:${tagColor}">${w.responsible}</span></span>
       <span class="range">${range}</span>
     </h3>`;
+
     w.tasks.forEach(t=>{
       const d=new Date(t.date);
       const dd=fmtDate(d);
@@ -386,6 +397,7 @@ function renderWeeks(){
   });
 }
 
+
 /* == Notifications locales == */
 let notificationsEnabled = false;
 function requestNotificationPermission(){
@@ -406,6 +418,7 @@ function updateNotifyButton(){
 }
 function scheduleNotifications(){
   if(!notificationsEnabled) return;
+  // Planifier des rappels pour les 7 prochains jours
   const now=new Date();
   const soon=[];
   PLAN.forEach(m=>m.weeks.forEach(w=>w.tasks.forEach(t=>{
@@ -414,6 +427,7 @@ function scheduleNotifications(){
   })));
   soon.forEach(({t,when})=>{
     const ms = when - new Date();
+    // sécurité : max 2^31-1 pour setTimeout ~ 24.8 jours
     setTimeout(()=>{
       if(notificationsEnabled){
         new Notification(`${t.icon} ${t.label}`, { body:`${t.whenLabel} • ${fmtDate(when)} ${fmtTime(when)} • ${t.who}` });
@@ -423,7 +437,7 @@ function scheduleNotifications(){
 }
 
 /* == Export ICS == */
-function toICSDate(dt){
+function toICSDate(dt){ // YYYYMMDDTHHMMSS
   const y=dt.getFullYear();
   const mo=pad(dt.getMonth()+1);
   const da=pad(dt.getDate());
@@ -466,6 +480,7 @@ function generateICS(events, filename="poubelles.ics"){
   a.remove();
 }
 function collectWeekEvents(week){
+  // chaque tâche = événement de 30 minutes
   return week.tasks.map(t=>{
     const start=new Date(t.date);
     const end=new Date(start.getTime()+30*60000);
@@ -478,35 +493,24 @@ function collectMonthEvents(month){
   return ev;
 }
 
-/* == Modales == */
+/* == Modale Règles == */
 function openRules(){document.getElementById("rulesModal").classList.add("open");document.getElementById("rulesModal").setAttribute("aria-hidden","false");}
 function closeRules(){document.getElementById("rulesModal").classList.remove("open");document.getElementById("rulesModal").setAttribute("aria-hidden","true");}
 
-/* == PopUp quotidien == */
-function showPopup(message){
-  document.getElementById("popupMessage").innerText=message;
-  document.getElementById("dailyPopup").classList.add("open");
-}
-function closePopup(){document.getElementById("dailyPopup").classList.remove("open");}
-function checkDailyPopup(){
-  const today=new Date();const cw=findCurrentWeek();if(!cw) return;
-  const taskToday=cw.tasks.find(t=>isSameDay(t.date,today));
-  if(taskToday){
-    let msg="";
-    if(cw.responsible==="LIBRE"){msg=`🚨 Aujourd'hui c'est ${taskToday.label} (${taskToday.whenLabel}) ! Pas de responsable désigné, mais quelqu'un doit s'y coller 🤷‍♂️`; }
-    else{msg=`${taskToday.icon} ${cw.responsible}, c'est ton tour ! (${taskToday.label} — ${taskToday.whenLabel}) 💪`;}
-    showPopup(msg);
-  }
-}
-
-/* == Init == */
+/* Init */
 function init(){
   generateYearPlan();
   renderHome(); renderLegend(); renderWeeks();
+
+  // Onglets
   document.getElementById("tab-home").onclick=()=>setActiveTab("home");
   document.getElementById("tab-planning").onclick=()=>setActiveTab("planning");
+
+  // Navigation mois
   document.getElementById("prevMonth").onclick=()=>{if(currentMonthIndex>0){currentMonthIndex--;renderWeeks();}};
   document.getElementById("nextMonth").onclick=()=>{if(currentMonthIndex<FUTURE_MONTHS.length-1){currentMonthIndex++;renderWeeks();}};
+
+  // Export
   document.getElementById("exportWeek").onclick=()=>{
     const cw=findCurrentWeek();
     if(!cw) return alert("Semaine courante introuvable.");
@@ -516,21 +520,26 @@ function init(){
     const m=FUTURE_MONTHS[currentMonthIndex];
     generateICS(collectMonthEvents(m), `poubelles-${(m.monthIdx+1).toString().padStart(2,'0')}-${m.year}.ics`);
   };
+
+  // Notifications
   document.getElementById("notifyToggle").onclick=async ()=>{
     if(!notificationsEnabled){
       await requestNotificationPermission();
       if(notificationsEnabled){ scheduleNotifications(); }
     }else{
-      notificationsEnabled=false;
+      notificationsEnabled=false; // simple toggle (pas de service worker)
     }
     updateNotifyButton();
   };
   updateNotifyButton();
   scheduleNotifications();
+
+  // Règles
   document.getElementById("openRules").onclick=openRules;
   document.getElementById("closeRules").onclick=closeRules;
-  setInterval(()=>{ renderHome(); }, 60_000);
-  checkDailyPopup(); // ✅ PopUp automatique au démarrage
+
+  // Rafraîchis dynamiques
+  setInterval(()=>{ renderHome(); }, 60_000); // minute
 }
 init();
 </script>
